@@ -188,3 +188,72 @@ Function ReadDir(dir)
 	ReadDir=retfiles
 End Function
 
+Class ArrayObject
+	Private m_array()
+	Public Sub Push(item)
+		dim size
+		dim newsize
+		size = UBound(m_array)
+		newsize = size + 1
+		ReDim Preserve m_array(newsize)
+		m_array(size)=item
+	End Sub
+
+	Public Property Get GetItem(idx)
+		dim size
+		size = UBound(m_array)
+		If idx >= size Then
+			GetItem=null
+		Else
+			GetItem=m_array(idx)
+		End If
+	End Property
+
+	Public Property Get Size()
+		Size = UBound(m_array)
+	End Property
+
+	Private Sub Class_Initialize()
+		ReDim m_array(0)
+	End Sub
+
+	Private Sub Class_Terminate()
+		ReDim m_array(0)
+	End Sub
+
+End Class
+
+Class DictObject
+	Private m_dict
+
+	Public Sub Add(k,v)
+		m_dict.Add k,v
+	End Sub
+
+	Public Property Get Size()
+		Size = UBound(m_dict.Keys()) + 1
+	End Property
+
+	Public Property Get Key(idx)
+		dim size
+		size = UBound(m_dict.Keys()) + 1
+		if idx < size Then
+			Key=m_dict.Keys()(idx)
+		Else
+			Key=null
+		End If
+	End Property
+
+	Public Property Get Value(k)		
+		Value=m_dict(k)
+	End Property
+
+	Private Sub Class_Initialize()
+		set m_dict = CreateObject("Scripting.Dictionary")
+	End Sub
+
+	Private Sub Class_Terminate()
+		set m_dict=Nothing
+	End Sub
+
+End Class
