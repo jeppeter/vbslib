@@ -223,6 +223,7 @@ Class ArrayObject
 
 End Class
 
+
 Class DictObject
 	Private m_dict
 
@@ -244,14 +245,36 @@ Class DictObject
 		End If
 	End Property
 
+	Public Sub Append(key,val)
+		dim obj
+		if m_dict.Exists(key) Then
+			m_dict.Item(key).Push(val)
+		Else
+			set obj = new ArrayObject
+			obj.Push(val)
+			m_dict.Add key,obj
+		End If		
+	End Sub
+
 	
 
 	Public Sub Delete(key)
 		m_dict.remove(key)
 	End Sub
 
-	Public Property Get Value(k)		
-		Value=m_dict(k)
+	Public Property Get Exists(k)
+		Exists=m_dict.Exists(k)
+	End Property
+
+	Public Property Get Value(k)
+		dim obj
+		On Error Resume Next
+		Err.Clear
+		Value=m_dict.Item(k)
+		if Err.Number <> 0 Then
+			set Value=m_dict.Item(k)
+		End If
+		On Error Goto 0
 	End Property
 
 	Private Sub Class_Initialize()
