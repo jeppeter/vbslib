@@ -244,6 +244,12 @@ Class DictObject
 		End If
 	End Property
 
+	
+
+	Public Sub Delete(key)
+		m_dict.remove(key)
+	End Sub
+
 	Public Property Get Value(k)		
 		Value=m_dict(k)
 	End Property

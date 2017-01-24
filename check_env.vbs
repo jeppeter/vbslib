@@ -517,17 +517,12 @@ Function Usage(ec,fmt)
     if fmt <> "" Then
         fh.Writeline(fmt)
     End if
-    fh.Writeline(WScript.ScriptName & " [OPTIONS] [CHECK_TARGET]")
+    fh.Writeline(WScript.ScriptName & " [OPTIONS] [File] [TARGET]")
     fh.Writeline(chr(9) &"-h|--help                    to display this information")
-    fh.Writeline("CHECK_TARGET can be below")
-    fh.Writeline(chr(9) &"make_platform  version       to check running platform environment")
-    fh.Writeline(chr(9) &"visual_studio version        to check for visual studio environment")
-    fh.Writeline(chr(9) &"golang   version             to check for golang environment")
-    fh.Writeline(chr(9) &"node  version                to check for node js environment")
-    fh.Writeline(chr(9) &"npm3  version                to check npm environment")
-    fh.Writeline(chr(9) &"cmake version                to check for cmake environment")
-    fh.Writeline(chr(9) &"nsis  version                to check for nsis environment")
-    fh.Writeline(chr(9) &"git   version                to check for git environment")
+    fh.Writeline(chr(9) &"-t|--timestamp    ENVVAL     to give timestamp to environment")
+    fh.Writeline(chr(9) &"-c|--check ENVVAL            to check environment value setted")
+    fh.Writeline(chr(9) &"[File]                       make file handle")
+
     WScript.Quit(ec)
 End Function
 
