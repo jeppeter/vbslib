@@ -1,4 +1,4 @@
-
+Option Explicit
 
 Function RunCommand(cmd)
 	dim objsh,res
@@ -61,6 +61,35 @@ Function GetEnv(varname)
 	end if
 End Function
 
+Function GetTempName(pattern)
+	dim fso,fname,tempdir,shell,extname,objRegEx,tempname
+	set fso = CreateObject("Scripting.FileSystemObject")
+	set shell = CreateObject("WScript.Shell")
+	Set objRegEx =  CreateObject("VBScript.RegExp")
+	objRegEx.Global = True
+	objRegEx.IgnoreCase = True
+	objRegEx.Pattern = "XXXXXX"
+	tempdir = shell.ExpandEnvironmentStrings("%TEMP%")
+	fname = fso.GetTempName()
+	extname = fso.GetBaseName(fname)
+	'WScript.Stderr.Writeline("extname of " & fname & "=" & extname)
+	tempname = objRegEx.Replace(pattern,extname)
+	If tempname = pattern Then
+		tempname = fname
+	End If
+	GetTempName=tempdir & "\" & tempname
+End Function
+
+Function WriteTempFile(str,pattern)
+	dim tempfile
+	dim fso,fh
+	tempfile=GetTempName(pattern)
+	set fso = CreateObject("Scripting.FileSystemObject")
+	set fh = fso.CreateTextFile(tempfile,True)
+	fh.Write(str)
+	WriteTempFile=tempfile
+End Function
+
 Function SetEnv(key,value)
 	dim objShell,colprocenvars
 	Set objShell = WScript.CreateObject("WScript.Shell")
@@ -86,6 +115,15 @@ Function FileExists(pathf)
 		FileExists=0
 	End If	
 End Function
+
+Function RemoveFileSafe(fname)
+	dim fso
+	set fso = CreateObject("Scripting.FileSystemObject")
+	If FileExists(fname) Then
+		fso.DeleteFile fname
+	End If
+End Function
+
 
 Function FolderExists(pathd)
 	dim fso
@@ -155,6 +193,22 @@ Function GetRunOut(exefile,commands,ByRef filterfunc,ByRef filterctx)
     Loop
     GetRunOut=retline
 End Function
+
+Function StrHasChar(instr,ch)
+	dim xlen
+	dim i
+	dim curch
+	xlen=Len(instr)
+	For i=0 to xlen-1 
+		curch=Mid(instr,i+1,1)
+		if curch = ch Then
+			StrHasChar=True
+			exit Function
+		End If
+	Next
+	StrHasChar=False	
+End Function
+
 
 Function ReadDir(dir)
 	dim fso
@@ -228,6 +282,9 @@ Class DictObject
 	Private m_dict
 
 	Public Sub Add(k,v)
+		if m_dict.Exists(k) Then
+			m_dict.Remove(k)
+		End If
 		m_dict.Add k,v
 	End Sub
 
@@ -286,3 +343,4 @@ Class DictObject
 	End Sub
 
 End Class
+
