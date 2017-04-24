@@ -41,7 +41,7 @@ Function RemoveTmpExpr(tmpdir,expr_re1)
 	expr_re = expr_re1
 	set re = new regexp
 	re.Pattern = expr_re
-	listfiles=ReadDir(tmpdir)
+	listfiles=ReadDirAll(tmpdir)
 	sarr=Split(listfiles,";")
 	For Each curfile in sarr
 		matched = 0

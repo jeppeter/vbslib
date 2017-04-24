@@ -161,21 +161,14 @@ next
 set argobj = ParseArgs(args)
 
 
-vsver=IsInstallVisualStudio(10.0,"SOFTWARE\Microsoft\VisualStudio")
-if IsEmpty(vsver) Then
-	wscript.stderr.writeline("Please Install visual studio new version than 14.0")
-	WScript.Quit(3)
+vsver=IsInstallVisualStudio(10.0)
+If IsEmpty(vsver) Then
+    wscript.stderr.writeline("can not find visual studio installed")
+    wscript.Quit(3)
 End If
-
-vspdir=ReadReg("HKEY_CURRENT_USER\SOFTWARE\Microsoft\VisualStudio\"& vsver &"_Config\InstallDir")
-if IsEmpty(vspdir) Then
+basedir=GetVisualStudioInstdir(10.0)
+if IsEmpty(basedir) Then
 	wscript.stderr.writeline("can not find visual studio install directory")
-	wscript.quit(4)
-End If
-
-basedir=FindoutInstallBasedir(vspdir,vsver)
-if basedir = "" Then
-	wscript.stderr.writeline("can not find visual studio install directory on " & vspdir)
 	wscript.quit(5)
 End If
 
@@ -183,9 +176,12 @@ dim nmakeexe,cmd,makefile,makedep
 dim dt ,timestamp,version
 dim runcon,tempfile
 
-nmakeexe=basedir+"\VC\bin\nmake.exe"
-wscript.echo ("basedir (" & basedir & ") nmake (" & nmakeexe & ")")
+nmakeexe = GetNmake(basedir,vsver)
+if IsEmpty(nmakeexe) Then
+	Wscript.Stderr.Writeline("can not get nmake")
+End If
 
+wscript.echo ("basedir (" & basedir & ") nmake (" & nmakeexe & ")")
 
 If argobj.Exists("check") Then
 	dim arrobj

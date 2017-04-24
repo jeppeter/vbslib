@@ -26,6 +26,7 @@ instdir=GetVisualStudioInstdir(10.0)
 vsver=IsInstallVisualStudio(10.0)
 if IsNull(instdir) Then
 	Wscript.Stderr.writeline("can not find visual studio installed")
+	Wscript.Quit(3)
 Else
 	Wscript.Stdout.writeline("install["&vsver&"]="&instdir)
 End If

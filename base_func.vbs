@@ -210,7 +210,7 @@ Function StrHasChar(instr,ch)
 End Function
 
 
-Function ReadDir(dir)
+Function ReadDirAll(dir)
 	dim fso
 	dim folder
 	dim lists
@@ -230,17 +230,45 @@ Function ReadDir(dir)
 		retfiles = retfiles & curfile
 		i = i + 1
 	Next
+	
 
 	For Each curfile in dirs
 		If i <> 0 Then
 		       retfiles = retfiles & ";"
 		End If
 		retfiles = retfiles & curfile
-		i = i + 1		
+		i = i + 1
 	Next
+
+
+	ReadDirAll=retfiles
+End Function
+
+Function ReadDir(dir)
+	dim fso
+	dim folder
+	dim lists
+	dim files,retfiles,dirs
+	dim i
+	dim curfile
+	Set fso = CreateObject("Scripting.FileSystemObject")
+	Set folder = fso.GetFolder(dir)
+	set dirs = folder.SubFolders
+    i = 0
+    retfiles=""	
+
+	For Each curfile in dirs
+		If i <> 0 Then
+		       retfiles = retfiles & ";"
+		End If
+		retfiles = retfiles & curfile
+		i = i + 1
+	Next
+
 
 	ReadDir=retfiles
 End Function
+
 
 Class ArrayObject
 	Private m_array()

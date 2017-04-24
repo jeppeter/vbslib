@@ -90,28 +90,6 @@ Function CheckInstallBasedir(directory)
 	CheckInstallBasedir=Empty
 End Function
 
-Function FindoutInstallBasedir(directory)
-	dim narr,i,j,num,sp,ret,clexe
-	narr = Split(directory,"\")
-	if IsArray(narr) Then
-	   num=Ubound(narr)
-	   i=num
-	   j=1
-	   sp=narr(0)
-	   While j < (i+1)
-	        clexe=sp & "\Common7\IDE\devenv.exe"
-	        ret=FileExists(clexe)
-	        if ret Then
-	            FindoutInstallBasedir=sp
-	            Exit Function
-	        End If
-	        sp = sp & "\" & narr(j)
-	        j = j+1
-	   Wend
-	End If
-	FindoutInstallBasedir=Empty
-End Function
-
 Function IsInstallVisualStudio(version)
 	dim curval
 	dim curver
@@ -123,13 +101,14 @@ Function IsInstallVisualStudio(version)
 	dim devcom
 	dim getversion
 	versions=Array(15.0,14.0,12.0)
+	values=Array("15.0","14.0","12.0")
 	devcom=GetDevenvCom()
 	if IsEmpty(devcom) Then
 		' nothing to get ,so we return error
 		IsInstallVisualStudio=Null
 		Exit Function
 	End If
-	WScript.Stderr.writeline("devcom[" & devcom &"]")
+	'WScript.Stderr.writeline("devcom[" & devcom &"]")
 
 	' now get the version 
 	getversion = GetVsVersion(devcom)
@@ -144,10 +123,11 @@ Function IsInstallVisualStudio(version)
 	max = Ubound(versions) + 1
 	Do while idx < max
 		curver = versions(idx)
+		curval = values(idx)
 		If curver >= (getversion-0.01) and curver <= (getversion + 0.01) and (version) <= (getversion) Then
 			instdir=CheckInstallBasedir(devcom)
 			if not IsEmpty(instdir) Then
-				IsInstallVisualStudio=curver
+				IsInstallVisualStudio=curval
 				Exit Function
 			End If
 		End If
@@ -189,6 +169,47 @@ Function VsVerifyCL(vsver)
 		VsVerifyCL=1
 	Else
 		VsVerifyCL=0
+	End If	
+End Function
+
+Function GetNmake(basedir,vsver)
+	dim msvcdir
+	dim curdir
+	dim fso
+	dim i,max
+	dim reads
+	dim arrdir
+	dim curfile
+	if vsver = "12.0" or vsver = "14.0" Then
+		curfile = basedir & "\VC\bin\nmake.exe"
+		Set fso = CreateObject("Scripting.FileSystemObject")
+		if fso.FileExists(curfile) Then
+			GetNmake=curfile
+			set fso = Nothing
+			Exit Function
+		End If
+		GetNmake=Empty
+	ElseIf vsver = "15.0" Then
+		msvcdir= basedir & "\VC\Tools\MSVC"
+		reads = ReadDir(msvcdir)
+		arrdir = Split(reads,";")
+		i = 0
+		max = Ubound(arrdir) + 1
+		Set fso = CreateObject("Scripting.FileSystemObject")
+		Do While i < max
+			curdir = arrdir(i)
+			curfile = curdir & "\bin\Hostx64\x64\nmake.exe"
+			if fso.FileExists(curfile) Then
+				set fso = Nothing
+				GetNmake=curfile
+				Exit Function
+			End If
+			i = i + 1
+		Loop
+		set fso = Nothing
+		GetNmake=empty
+	Else
+		GetNmake=empty		
 	End If	
 End Function
 
