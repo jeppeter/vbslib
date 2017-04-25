@@ -1,47 +1,27 @@
 
 Option Explicit
 
-Class VsFilterVersion
-    Private m_version
-    Public Function FilterVersion(line)
-        dim re,result,num,a,resa,b
-        set re = new regexp
-        '  to get the gox.x.x version number
-        re.Pattern = "^Microsoft Visual Studio\s+.*\s+([0-9]+((\.[0-9]*)+))"
-        set result = re.Execute(line)   
-        num = 0
-        if Not IsEmpty(result) Then
-            for Each a in result
-            	' we take two version
-                re.Pattern = "[\d]+\.[\d]+"
-                set resa = re.Execute(a)
-                if Not IsEmpty(resa) Then
-                    for Each b in resa
-                        b = Trim(b)
-                        m_version=b
-                    Next
-                End If
-            Next
-        End If
-    End Function
-    Public Function  GetVersion()
-        GetVersion=m_version
-    End Function
-End Class
 
-
-Function FilterVsversion(line,filterctx)
-    filterctx.FilterVersion(line)
-    FilterVsversion=true
-End Function
-
-dim vscmdversion
-
-Function GetVsVersion(devenvcom)
-	dim cmd
-	set vscmdversion = new VsFilterVersion
-	call GetRunOut(devenvcom,"/?","FilterVsversion","vscmdversion")
-	GetVsVersion=vscmdversion.GetVersion()
+Function GetVsVersion()
+	dim regk ,regv,regobj,regarr,c
+	regk = "HKEY_CLASSES_ROOT\VisualStudio.DTE\CurVer\"
+	regv = ReadReg(regk)
+	if IsEmpty(regv) Then
+		GetVsVersion=""
+		Exit Function
+	End If
+	set regobj = CreateObject("VBScript.RegExp")
+	regobj.Global = True
+	regobj.IgnoreCase = True	
+	regobj.Pattern = "[\d]+\.[\d]+"	
+	set regarr = regobj.Execute(regv)
+	for each c in regarr
+		set regarr = Nothing
+		set regobj = Nothing
+		GetVsVersion=c
+		Exit Function
+	Next
+	GetVsVersion=""
 End Function
 
 Function GetDevenvCom()
@@ -111,7 +91,7 @@ Function IsInstallVisualStudio(version)
 	'WScript.Stderr.writeline("devcom[" & devcom &"]")
 
 	' now get the version 
-	getversion = GetVsVersion(devcom)
+	getversion = GetVsVersion()
 	if Len(getversion) <= 0 Then
 		IsInstallVisualStudio=Null
 		Exit Function
