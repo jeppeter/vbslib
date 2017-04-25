@@ -179,6 +179,7 @@ dim runcon,tempfile
 nmakeexe = GetNmake(basedir,vsver)
 if IsEmpty(nmakeexe) Then
 	Wscript.Stderr.Writeline("can not get nmake")
+	Wscript.Quit(7)
 End If
 
 wscript.echo ("basedir (" & basedir & ") nmake (" & nmakeexe & ")")

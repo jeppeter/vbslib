@@ -142,15 +142,6 @@ Function GetVisualStudioInstdir(version)
 	GetVisualStudioInstdir=Null
 End Function
 
-Function VsVerifyCL(vsver)
-	dim getver
-	getver=IsInstallVisualStudio(vsver)
-	if not IsNull(getver) Then
-		VsVerifyCL=1
-	Else
-		VsVerifyCL=0
-	End If	
-End Function
 
 Function GetNmake(basedir,vsver)
 	dim msvcdir
