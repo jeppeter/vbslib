@@ -226,7 +226,7 @@ If argobj.Value("novc") Then
 			i = 1
 			Do While i < arrobj.Size()
 				cmd = GetNmake(basedir,vsver)
-				cmd = cmd & " /f " & chr(34) & makefile & chr(34)
+				cmd = chr(34) & cmd & chr(34) & " /f " & chr(34) & makefile & chr(34)
 				makedep=arrobj.GetItem(i)
 				cmd = cmd &  " " & chr(34) & makedep & chr(34)
 				WScript.Stderr.Writeline("cmd["&cmd&"]")
@@ -235,7 +235,7 @@ If argobj.Value("novc") Then
 			Loop
 		Else
 			cmd = GetNmake(basedir,vsver)
-			cmd =  cmd & " /f " & chr(34) & makefile  & chr(34)
+			cmd =  chr(34) & cmd & chr(34) & " /f " & chr(34) & makefile  & chr(34)
 			WScript.Stderr.Writeline("cmd["&cmd&"]")
 			RunCommand(cmd)
 		End If
@@ -298,5 +298,7 @@ Else
 	RunCommand(cmd)
 	if not argobj.Value("reserve") Then
 		RemoveFileSafe(tempfile)
+	Else
+		Wscript.Stderr.Writeline("tempfile["&tempfile&"]")
 	End If
 End If
