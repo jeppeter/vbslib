@@ -225,7 +225,7 @@ If argobj.Value("novc") Then
 		if arrobj.Size() >= 2 Then
 			i = 1
 			Do While i < arrobj.Size()
-				cmd = GetNmakeCommand(argobj)
+				cmd = GetNmake(basedir,vsver)
 				cmd = cmd & " /f " & chr(34) & makefile & chr(34)
 				makedep=arrobj.GetItem(i)
 				cmd = cmd &  " " & chr(34) & makedep & chr(34)
@@ -234,19 +234,26 @@ If argobj.Value("novc") Then
 				i = i + 1
 			Loop
 		Else
-			cmd = GetNmakeCommand(argobj)
+			cmd = GetNmake(basedir,vsver)
 			cmd =  cmd & " /f " & chr(34) & makefile  & chr(34)
 			WScript.Stderr.Writeline("cmd["&cmd&"]")
 			RunCommand(cmd)
 		End If
 	Else
-		cmd=GetNmakeCommand(argobj)
+		cmd = GetNmake(basedir,vsver)
 		WScript.Stderr.Writeline("cmd["&cmd&"]")
 		RunCommand(cmd)
 	End If
 Else
 	runcon = ""
-	runcon = runcon & "call " & chr(34) & basedir & "\VC\vcvarsall.bat" & chr(34) & " "  & argobj.Value("vcmode")  & chr(13) & chr(10)
+	if vsver = "12.0" or vsver = "14.0" Then
+		runcon = runcon & "call " & chr(34) & basedir & "\VC\vcvarsall.bat" & chr(34) & " "  & argobj.Value("vcmode")  & chr(13) & chr(10)
+	Elseif vsver = "15.0" Then
+		runcon = runcon & "call " & chr(34) & basedir & "\VC\Auxiliary\Build\vcvarsall.bat" & chr(34) & " " & argobj.Value("vcmode") & chr(13) & chr(10)
+	Else
+		Wscript.Stderr.Writeline("vsver["&vsver&"]not supported")
+		Wscript.Quit(3)
+	End If
 	runcon = runcon & "cscript.exe //Nologo " & chr(34) & WScript.ScriptFullName & chr(34)
 	runcon = runcon & " --novc"
 	If argobj.Exists("timestamp") Then

@@ -14,14 +14,14 @@ Function FormatBatch(basedir,compiletarget,slnfile,target,fname,vsver)
 		fh.WriteLine(cmdline)
 	Else
 		if compiletarget = "amd64"  Then
-			cmdline = "call " chr(34) & basedir & "\VC\Auxiliary\Build\vcvarsall.bat" & chr(34) & " x64"
+			cmdline = "call " & chr(34) & basedir & "\VC\Auxiliary\Build\vcvarsall.bat" & chr(34) & " x64"
 			fh.Writeline(cmdline)
-			cmdline = chr(34) & basedir & "Common7\IDE\devenv.exe" & chr(34) & " " & chr(34) & slnfile & chr(34) & " /useenv /build " & chr(34) & target & chr(34)
+			cmdline = chr(34) & basedir & "\Common7\IDE\devenv.exe" & chr(34) & " " & chr(34) & slnfile & chr(34) & " /useenv /build " & chr(34) & target & chr(34)
 			fh.Writeline(cmdline)
 		Elseif compiletarget = "amd64_x86" Then
-			cmdline = "call " chr(34) & basedir & "\VC\Auxiliary\Build\vcvarsall.bat" & chr(34) & " x64_x86"
+			cmdline = "call " & chr(34) & basedir & "\VC\Auxiliary\Build\vcvarsall.bat" & chr(34) & " x64_x86"
 			fh.Writeline(cmdline)
-			cmdline = chr(34) & basedir & "Common7\IDE\devenv.exe" & chr(34) & " " & chr(34) & slnfile & chr(34) & " /useenv /build " & chr(34) & target & chr(34)
+			cmdline = chr(34) & basedir & "\Common7\IDE\devenv.exe" & chr(34) & " " & chr(34) & slnfile & chr(34) & " /useenv /build " & chr(34) & target & chr(34)
 			fh.Writeline(cmdline)
 		Else
 			Wscript.Stderr.Writeline("not supported compiletarget["& compiletarget &"]")
