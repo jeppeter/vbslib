@@ -257,7 +257,7 @@ Else
 	runcon = runcon & "cscript.exe //Nologo " & chr(34) & WScript.ScriptFullName & chr(34)
 	runcon = runcon & " --novc"
 	If argobj.Exists("timestamp") Then
-		runcon = runcon & " " & chr(34) & argobj.Value("timestamp") & chr(34)
+		runcon = runcon & " --timestamp " & chr(34) & argobj.Value("timestamp") & chr(34)
 	End If
 
 	If argobj.Exists("check") Then
