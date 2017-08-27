@@ -42,12 +42,12 @@ Function GetInterfaceIndexByFirst()
 		re.Pattern = "[0-9]+"
 		set matches = re.Execute(sarr(1))
 		if matches.Count > 0 Then
-			GetInterfaceIndex=matches(0)
+			GetInterfaceIndexByFirst=matches(0)
 		Else
-			GetInterfaceIndex="-1"
+			GetInterfaceIndexByFirst="-1"
 		End If
 	Else
-		GetInterfaceIndex="-1"
+		GetInterfaceIndexByFirst="-1"
 	End If
 End Function
 
