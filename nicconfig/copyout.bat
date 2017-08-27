@@ -16,5 +16,7 @@ copy /Y %FROMDIR%\cmdexec.vbs %OUTDIR%\cmdexec.vbs
 copy /Y %FROMDIR%\vbsjson.vbs %OUTDIR%\vbsjson.vbs
 copy /Y %FROMDIR%\changeip.vbs %OUTDIR%\changeip.vbs
 copy /Y %FROMDIR%\btcmd %OUTDIR%\btcmd
+copy /Y %FROMDIR%\install.bat %OUTDIR%\install.bat
+copy /Y %FROMDIR%\uninstall.bat %OUTDIR%\uninstall.bat
 
 echo on
