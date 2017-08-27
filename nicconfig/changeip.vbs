@@ -21,13 +21,14 @@ call includeFile( GetScriptDir() & "\vbsjson.vbs")
 
 dim ipfile
 dim windir 
-dim logfile
+dim logf
 dim existfile
 dim content
 dim jsondec
 dim runok
 dim index
 dim retval
+dim json
 
 windir = GetEnv("WINDIR")
 
@@ -36,28 +37,35 @@ If IsNull(windir) Then
 	Wscript.Quit(3)
 End If
 
-logfile = windir & "\..\iplog.txt"
+logf = windir & "\..\iplog.txt"
 ipfile = windir & "\..\btcmd"
 
+If WScript.Arguments.Count > 0 Then
+	ipfile = WScript.Arguments(0)
+End If
 
+If WScript.Arguments.Count > 1 Then
+	logf = WScript.Arguments(1)
+End If
 
-
-existfile = FileExists ipfile
+existfile = FileExists(ipfile)
 if not existfile Then
 	'  nothing to handle
 	WScript.Quit(0)
 End If
 
-content = ReadFileAll ipfile
+content = ReadFileAll(ipfile)
 if Len(content) = 0 Then
 	' nothing to handle
 	DeleteFileSafe ipfile
 	Wscript.Quit(0)
 End If
 
-jsondec = json.decode(content)
+
+set json = new VbsJson
+set jsondec = json.decode(content)
 if IsNull(jsondec) or IsEmpty(jsondec) Then
-	AppendFile logfile,"can not parse [" & content & "]"
+	LogFile logf,"can not parse [" & content & "]"
 	Wscript.Quit(3)
 End If
 
@@ -69,34 +77,39 @@ if jsondec.Exists("ipconfig") Then
 		jsondec("ipconfig").Exists("gateway") and _
 		jsondec("ipconfig").Exists("dns") Then
 
-		index=GetInterfaceIndex()
+		if jsondec("ipconfig").Exists("macaddr") Then
+			index=GetInterfaceIndexByMac(jsondec("ipconfig")("macaddr"))
+		Else
+			index=GetInterfaceIndexByFirst()
+		End If
 		if index <> "-1" Then
-			retval = SetIpNetMask index,jsondec("ipconfig")("ipaddr"), jsondec("ipconfig")("netmask")
+			retval = SetIpNetMask(index,jsondec("ipconfig")("ipaddr"), jsondec("ipconfig")("netmask"))
 			if retval = 0 Then
-				retval = SetGateWay index,jsondec("ipconfig")("gateway")
+				retval = SetGateWay(index,jsondec("ipconfig")("gateway"))
 				if retval = 0 Then
-					retval = SetDns index,jsondec("ipconfig")("dns")
+					retval = SetDns(index,jsondec("ipconfig")("dns"))
 					if retval = 0 Then
 						runok = True
 					Else
-						AppendFile logfile,"can not set dns"
+						LogFile logf,"can not set dns"
 					End If
 				Else
-					AppendFile logfile,"can not set gateway"
+					LogFile logf,"can not set gateway"
 				End If
 			Else
-				AppendFile logfile,"can not set SetIpNetMask"
+				LogFile logf,"can not set SetIpNetMask"
 			End If
 		End If
 
 	Else
-		AppendFile logfile,"not valid in ipconfig for ipaddr or netmask or gateway or dns"
+		LogFile logf,"not valid in ipconfig for ipaddr or netmask or gateway or dns"
 	End If
 End If
 
 
 if runok Then
-	DeleteFileSafe ipfile
+	DeleteFileSafe(ipfile)
+	LogFile logf,"Run Ip Change succ"
 	WScript.Quit(0)
 End If
 

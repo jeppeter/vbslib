@@ -47,3 +47,10 @@ Function AppendFile(outfile,outstr)
 	fout.Close()
 	AppendFile=True
 End Function
+
+Function LogFile(outfile,outstr)
+	dim logstr
+	logstr = "[" & FormatDateTime(Now) & "] " & outstr
+	WScript.Stderr.WriteLine(logstr)
+	AppendFile outfile,logstr
+End Function
