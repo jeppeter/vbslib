@@ -11,8 +11,8 @@ Function RuncmdOutput(cmd)
 	set objshell = WScript.CreateObject("WScript.Shell")
 	set runobj = objshell.Exec(cmd)
 	Do While Not runobj.Stdout.AtEndOfStream
-		reply = runobj.Stdout.ReadLine()
-		outputlines = outputlines & reply & chr(10)
+		reply = runobj.Stdout.ReadAll()
+		outputlines = outputlines & reply
 	Loop
 	RuncmdOutput=outputlines
 End Function
