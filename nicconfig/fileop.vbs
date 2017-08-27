@@ -36,3 +36,14 @@ Function DeleteFileSafe(infile)
 	End If
 	DeleteFileSafe=retval
 End Function
+
+Function AppendFile(outfile,outstr)
+	dim fso
+	dim fout
+
+	set fso = WScript.CreateObject("Scripting.FileSystemObject")
+	set fout = fso.OpenTextFile(outfile,8,True,0)
+	fout.WriteLine(outstr)
+	fout.Close()
+	AppendFile=True
+End Function
