@@ -1,6 +1,6 @@
 {
 	"ipconfig" : {
-		"macaddr2" : "00:0C:29:D0:AF:08",
+		"macaddr" : "00:0C:29:D0:AF:08",
 		"ipaddr" : "192.168.5.99",
 		"netmask" : "255.255.240.0",
 		"gateway" : ["192.168.0.1"] ,

@@ -79,6 +79,12 @@ if jsondec.Exists("ipconfig") Then
 
 		if jsondec("ipconfig").Exists("macaddr") Then
 			index=GetInterfaceIndexByMac(jsondec("ipconfig")("macaddr"))
+			if index = "-1" Then
+				' we not find ,so delete the File
+				LogFile logf,"can not find macaddr[" & jsondec("ipconfig")("macaddr") & "]"
+				DeleteFileSafe(ipfile)
+				WScript.Quit(3)
+			End If
 		Else
 			index=GetInterfaceIndexByFirst()
 		End If
