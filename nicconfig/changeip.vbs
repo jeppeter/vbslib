@@ -22,7 +22,7 @@ call includeFile( GetScriptDir() & "\vbsjson.vbs")
 dim ipfile
 dim windir 
 dim logfile
-dim exists
+dim existfile
 dim content
 dim jsondec
 dim runok
@@ -42,8 +42,8 @@ ipfile = windir & "\..\btcmd"
 
 
 
-exists = FileExists ipfile
-if not exists Then
+existfile = FileExists ipfile
+if not existfile Then
 	'  nothing to handle
 	WScript.Quit(0)
 End If
