@@ -115,24 +115,9 @@ Function SetGateWay(index,gatewayip)
 			End If
 			curnum = curnum + 1
 		Next
-
-		if curnum = 2 Then
-			if gatewayip(0) = "192.168.0.1" Then
-				optip = "192.168.0.2"
-			Else
-				optip = "192.168.0.1"
-			End If
-			gatestr = gatestr & "," & chr(34) & optip & chr(34)
-			metricstr = metricstr & ",2"
-		End If
 	Else
-		if gatewayip = "192.168.0.1" Then
-			optip = "192.168.0.2"
-		Else
-			optip = "192.168.0.1"
-		End If
-		gatestr = chr(34) & gatewayip & chr(34) & "," & chr(34) & optip & chr(34)
-		metricstr = "1,2"
+		gatestr = chr(34) & gatewayip & chr(34)
+		metricstr = "1"
 	End If
 	cmd = "wmic nicconfig where index=" & index & " call setgateways("& gatestr & "),(" & metricstr & ")"
 	WScript.Echo "run cmd [" & cmd & "]"
