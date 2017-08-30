@@ -29,7 +29,10 @@ dim runok
 dim index
 dim retval
 dim json
+dim countmax
+dim icnt
 
+countmax = 5
 windir = GetEnv("WINDIR")
 
 If IsNull(windir) Then
@@ -89,6 +92,47 @@ if jsondec.Exists("ipconfig") Then
 			index=GetInterfaceIndexByFirst()
 		End If
 		if index <> "-1" Then
+			icnt = 0
+			Do While True
+				if icnt >= countmax Then
+					LogFile logf,"can not set ip ["& jsondec("ipconfig")("ipaddr") &"] netmask[" & jsondec("ipconfig")("netmask")& "]"
+					WScript.Quit(3)
+				End If
+				retval = SetIpNetMask(index,jsondec("ipconfig")("ipaddr"), jsondec("ipconfig")("netmask"))
+				if retval Then
+					Exit Do
+				End If
+				icnt = icnt + 1
+			Loop
+
+			icnt = 0
+			Do While True
+				if icnt >= countmax Then
+					LogFile logf,"can not set gateway ["& jsondec("ipconfig")("gateway") &"]"
+					WScript.Quit(3)
+				End If
+				retval = SetGateWay(index,jsondec("ipconfig")("gateway"))
+				if retval Then
+					Exit Do
+				End If
+				icnt = icnt + 1
+			Loop
+
+
+			icnt = 0
+			Do While True
+				if icnt >= countmax Then
+					LogFile logf,"can not set dns ["& Ubo &"]"
+					WScript.Quit(3)
+				End If
+				retval = SetGateWay(index,jsondec("ipconfig")("gateway"))
+				if retval Then
+					Exit Do
+				End If
+				icnt = icnt + 1
+			Loop
+
+
 			retval = SetIpNetMask(index,jsondec("ipconfig")("ipaddr"), jsondec("ipconfig")("netmask"))
 			if retval = 0 Then
 				retval = SetGateWay(index,jsondec("ipconfig")("gateway"))

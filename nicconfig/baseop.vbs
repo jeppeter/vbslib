@@ -12,3 +12,11 @@ Function GetEnv(varname)
 		GetEnv=val
 	end if
 End Function
+
+Function FormatArray(arr)
+	dim retstr
+	retstr = ""
+	
+
+	FormatArray=retstr
+End Function

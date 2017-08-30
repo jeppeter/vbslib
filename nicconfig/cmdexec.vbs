@@ -87,11 +87,48 @@ Function GetInterfaceIndexByMac(macaddr)
 End Function
 
 
+Function GetWmicResult(outputs)
+	dim re
+	dim sarr
+	dim curline
+	dim matches
+	dim retval
+	dim lsarr
+	dim partre
+	dim partmatches
+	set re = new regexp
+	set partre = new regexp
+	sarr = Split(outputs,chr(10))
+	re.Pattern = "\s+ReturnValue\s+=\s+([\d]+);"
+	partre.Pattern = "[\d]+"
+	if Ubound(sarr) > 0 THen
+		For Each curline in sarr
+			curline = replace(curline,chr(13),"")
+			set matches = re.Execute(curline)
+			if matches.Count > 0 Then
+				set partmatches = partre.Execute(curline)
+				if partmatches.Count > 0 Then
+					retval = CInt(partmatches(0))
+					if retval = 0 Then
+						GetWmicResult=True
+					Else
+						GetWmicResult=False
+					End If
+					Exit Function
+				End If
+			End If
+		Next
+	End If
+	GetWmicResult=False
+End Function
+
 Function SetIpNetMask(index,ipaddr,netmask)
 	dim cmd
+	dim outputs
 	cmd = "wmic nicconfig where index=" & index & " call enablestatic(" & chr(34) & ipaddr & chr(34) & "),(" & chr(34) & netmask & chr(34) & ")"
 	WScript.Echo "run cmd [" & cmd & "]"
-	SetIpNetMask=RunCommand(cmd)
+	outputs=RuncmdOutput(cmd)
+	SetIpNetMask=GetWmicResult(outputs)
 End Function
 
 Function SetGateWay(index,gatewayip)
