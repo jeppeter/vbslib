@@ -138,6 +138,7 @@ Function SetGateWay(index,gatewayip)
 	dim metricstr
 	dim curip
 	dim curnum
+	dim outputs
 	gatestr = ""
 	metricstr = ""
 	if VarType(gatewayip) & vbArray Then
@@ -158,13 +159,15 @@ Function SetGateWay(index,gatewayip)
 	End If
 	cmd = "wmic nicconfig where index=" & index & " call setgateways("& gatestr & "),(" & metricstr & ")"
 	WScript.Echo "run cmd [" & cmd & "]"
-	SetGateWay=RunCommand(cmd)
+	outputs=RuncmdOutput(cmd)
+	SetGateWay=GetWmicResult(outputs)
 End Function
 
 Function SetDns(index,dnsserver)
 	dim cmd
 	dim curip
 	dim dnsstr
+	dim outputs
 	if VarType(dnsserver) & vbArray Then
 		dnsstr = ""
 		For Each curip in dnsserver
@@ -179,5 +182,6 @@ Function SetDns(index,dnsserver)
 	End If
 	cmd = "wmic nicconfig where index=" & index & " call SetDNSServerSearchOrder(" & dnsstr & ")"
 	WScript.Echo "run cmd [" & cmd & "]"
-	SetDns=RunCommand(cmd)
+	outputs=RuncmdOutput(cmd)
+	SetDns=GetWmicResult(outputs)
 End Function

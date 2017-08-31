@@ -84,7 +84,7 @@ if jsondec.Exists("ipconfig") Then
 			index=GetInterfaceIndexByMac(jsondec("ipconfig")("macaddr"))
 			if index = "-1" Then
 				' we not find ,so delete the File
-				LogFile logf,"can not find macaddr[" & jsondec("ipconfig")("macaddr") & "]"
+				LogFile logf,"can not find macaddr " & FormatArray(jsondec("ipconfig")("macaddr"))
 				DeleteFileSafe(ipfile)
 				WScript.Quit(3)
 			End If
@@ -95,7 +95,7 @@ if jsondec.Exists("ipconfig") Then
 			icnt = 0
 			Do While True
 				if icnt >= countmax Then
-					LogFile logf,"can not set ip ["& jsondec("ipconfig")("ipaddr") &"] netmask[" & jsondec("ipconfig")("netmask")& "]"
+					LogFile logf,"can not set ip "& FormatArray(jsondec("ipconfig")("ipaddr")) &" netmask " & FormatArray(jsondec("ipconfig")("netmask"))
 					WScript.Quit(3)
 				End If
 				retval = SetIpNetMask(index,jsondec("ipconfig")("ipaddr"), jsondec("ipconfig")("netmask"))
@@ -108,7 +108,7 @@ if jsondec.Exists("ipconfig") Then
 			icnt = 0
 			Do While True
 				if icnt >= countmax Then
-					LogFile logf,"can not set gateway ["& jsondec("ipconfig")("gateway") &"]"
+					LogFile logf,"can not set gateway "& FormatArray(jsondec("ipconfig")("gateway"))
 					WScript.Quit(3)
 				End If
 				retval = SetGateWay(index,jsondec("ipconfig")("gateway"))
@@ -122,33 +122,16 @@ if jsondec.Exists("ipconfig") Then
 			icnt = 0
 			Do While True
 				if icnt >= countmax Then
-					LogFile logf,"can not set dns ["& Ubo &"]"
+					LogFile logf,"can not set dns "& FormatArray(jsondec("ipconfig")("dns"))
 					WScript.Quit(3)
 				End If
-				retval = SetGateWay(index,jsondec("ipconfig")("gateway"))
+				retval = SetDns(index,jsondec("ipconfig")("dns"))
 				if retval Then
 					Exit Do
 				End If
 				icnt = icnt + 1
 			Loop
 
-
-			retval = SetIpNetMask(index,jsondec("ipconfig")("ipaddr"), jsondec("ipconfig")("netmask"))
-			if retval = 0 Then
-				retval = SetGateWay(index,jsondec("ipconfig")("gateway"))
-				if retval = 0 Then
-					retval = SetDns(index,jsondec("ipconfig")("dns"))
-					if retval = 0 Then
-						runok = True
-					Else
-						LogFile logf,"can not set dns"
-					End If
-				Else
-					LogFile logf,"can not set gateway"
-				End If
-			Else
-				LogFile logf,"can not set SetIpNetMask"
-			End If
 		End If
 
 	Else
