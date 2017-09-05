@@ -131,6 +131,7 @@ if jsondec.Exists("ipconfig") Then
 				End If
 				icnt = icnt + 1
 			Loop
+			runok=True
 
 		End If
 
