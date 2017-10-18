@@ -185,3 +185,22 @@ Function SetDns(index,dnsserver)
 	outputs=RuncmdOutput(cmd)
 	SetDns=GetWmicResult(outputs)
 End Function
+
+Function SetIpDhcp(index)
+	dim cmd
+	dim outputs
+	cmd = "wmic nicconfig where index=" & index & " call EnableDHCP"
+	WScript.Echo "run cmd [" & cmd & "]"
+	outputs=RuncmdOutput(cmd)
+	SetIpDhcp=GetWmicResult(outputs)
+End Function
+
+Function SetDnsDhcp(index)
+	dim cmd
+	dim outputs
+	cmd = "wmic nicconfig where index=" & index & " call SetDNSServerSearchOrder()"
+	WScript.Echo "run cmd [" & cmd & "]"
+	outputs=RuncmdOutput(cmd)
+	SetDnsDhcp=GetWmicResult(outputs)
+End Function
+

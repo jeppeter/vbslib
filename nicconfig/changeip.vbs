@@ -77,22 +77,22 @@ End If
 runok=False
 
 if jsondec.Exists("ipconfig") Then
+	if jsondec("ipconfig").Exists("macaddr") Then
+		index=GetInterfaceIndexByMac(jsondec("ipconfig")("macaddr"))
+		if index = "-1" Then
+			' we not find ,so delete the File
+			LogFile logf,"can not find macaddr " & FormatArray(jsondec("ipconfig")("macaddr"))
+			DeleteFileSafe(ipfile)
+			WScript.Quit(3)
+		End If
+	Else
+		index=GetInterfaceIndexByFirst()
+	End If
+
 	if jsondec("ipconfig").Exists("ipaddr") and _
 		jsondec("ipconfig").Exists("netmask") and _
-		jsondec("ipconfig").Exists("gateway") and _
-		jsondec("ipconfig").Exists("dns") Then
+		jsondec("ipconfig").Exists("gateway") Then
 
-		if jsondec("ipconfig").Exists("macaddr") Then
-			index=GetInterfaceIndexByMac(jsondec("ipconfig")("macaddr"))
-			if index = "-1" Then
-				' we not find ,so delete the File
-				LogFile logf,"can not find macaddr " & FormatArray(jsondec("ipconfig")("macaddr"))
-				DeleteFileSafe(ipfile)
-				WScript.Quit(3)
-			End If
-		Else
-			index=GetInterfaceIndexByFirst()
-		End If
 		if index <> "-1" Then
 			icnt = 0
 			Do While True
@@ -120,26 +120,74 @@ if jsondec.Exists("ipconfig") Then
 				icnt = icnt + 1
 			Loop
 
-
+			WScript.Stderr.WriteLine("write static ip")
+			runok=True
+		Else
+			LogFile logf,"can not find right index"
+			WScript.Quit(4)
+		End If
+	Else
+		If index <> "-1" Then
 			icnt = 0
-			Do While True
+			Do While icnt < 5
 				if icnt >= countmax Then
-					LogFile logf,"can not set dns "& FormatArray(jsondec("ipconfig")("dns"))
+					LogFile logf,"can not set ip dhcp"
 					WScript.Quit(3)
 				End If
-				retval = SetDns(index,jsondec("ipconfig")("dns"))
+
+				retval = SetIpDhcp(index)
 				if retval Then
 					Exit Do
 				End If
 				icnt = icnt + 1
 			Loop
+
+			WScript.Stderr.WriteLine("write dhcp ip")
 			runok=True
-
+		Else
+			LogFile logf,"can not find right index"
+			WScript.Quit(4)
 		End If
-
-	Else
-		LogFile logf,"not valid in ipconfig for ipaddr or netmask or gateway or dns"
 	End If
+
+	If jsondec("ipconfig").Exists("dns") Then
+		icnt = 0
+		Do While True
+			if icnt >= countmax Then
+				LogFile logf,"can not set dns "& FormatArray(jsondec("ipconfig")("dns"))
+				WScript.Quit(3)
+			End If
+			retval = SetDns(index,jsondec("ipconfig")("dns"))
+			if retval Then
+				Exit Do
+			End If
+			icnt = icnt + 1
+		Loop
+		WScript.Stderr.WriteLine("write static dns")
+	Else 
+		If not jsondec("ipconfig").Exists("ipaddr") or  _
+			not jsondec("ipconfig").Exists("netmask") or _
+			not jsondec("ipconfig").Exists("gateway") Then
+			icnt = 0
+			Do While True
+				if icnt >= countmax Then
+					LogFile logf,"can not set dns dhcp"
+					WScript.Quit(3)
+				End If
+				retval = SetDnsDhcp(index)
+				if retval Then
+					Exit Do
+				End If
+				icnt = icnt + 1
+			Loop
+
+			WScript.Stderr.WriteLine("write dhcp dns")
+		Else
+			LogFile logf,"not valid ipconfig json file for dns"
+			WScript.Quit(5)
+		End If
+	End If
+
 End If
 
 
