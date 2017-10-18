@@ -36,6 +36,8 @@ countmax = 5
 windir = GetEnv("WINDIR")
 
 If IsNull(windir) Then
+	logf = "..\iplog.txt"
+	LogFile logf,"can not find WINDIR"
 	WScript.Stderr.WriteLine("can not find WINDIR")
 	Wscript.Quit(3)
 End If
