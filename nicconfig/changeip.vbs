@@ -78,17 +78,32 @@ End If
 runok=False
 
 if jsondec.Exists("ipconfig") Then
-	if jsondec("ipconfig").Exists("macaddr") Then
-		index=GetInterfaceIndexByMac(jsondec("ipconfig")("macaddr"))
-		if index = "-1" Then
-			' we not find ,so delete the File
-			LogFile logf,"can not find macaddr " & FormatArray(jsondec("ipconfig")("macaddr"))
-			DeleteFileSafe(ipfile)
-			WScript.Quit(3)
+	icnt = 0 
+	Do While True
+		If icnt >= 20 Then
+			LogFile logf,"can not get mac index"
+			WScript.Quit(5)
 		End If
-	Else
-		index=GetInterfaceIndexByFirst()
-	End If
+
+		if jsondec("ipconfig").Exists("macaddr") Then
+			index=GetInterfaceIndexByMac(jsondec("ipconfig")("macaddr"))
+			if index = "-1" Then
+				' we not find ,so delete the File
+				LogFile logf,"can not find macaddr " & FormatArray(jsondec("ipconfig")("macaddr"))
+				DeleteFileSafe(ipfile)
+				WScript.Quit(3)
+			End If
+		Else
+			index=GetInterfaceIndexByFirst()
+		End If
+		
+		if index <> "-1" Then
+			Exit Do
+		End If
+
+		icnt = icnt + 1
+		WScript.Sleep 5000
+	Loop
 
 	if jsondec("ipconfig").Exists("ipaddr") and _
 		jsondec("ipconfig").Exists("netmask") and _
