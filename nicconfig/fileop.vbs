@@ -51,6 +51,6 @@ End Function
 Function LogFile(outfile,outstr)
 	dim logstr
 	logstr = "[" & FormatDateTime(Now) & "] " & outstr
-	WScript.Stderr.WriteLine(logstr)
+	WScript.Echo logstr
 	AppendFile outfile,logstr
 End Function

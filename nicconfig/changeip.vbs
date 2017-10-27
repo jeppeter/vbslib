@@ -38,7 +38,7 @@ windir = GetEnv("WINDIR")
 If IsNull(windir) Then
 	logf = "..\iplog.txt"
 	LogFile logf,"can not find WINDIR"
-	WScript.Stderr.WriteLine("can not find WINDIR")
+	WScript.Echo "can not find WINDIR"
 	Wscript.Quit(3)
 End If
 
@@ -48,6 +48,7 @@ ipfile = windir & "\..\btcmd"
 If WScript.Arguments.Count > 0 Then
 	ipfile = WScript.Arguments(0)
 End If
+
 
 If WScript.Arguments.Count > 1 Then
 	logf = WScript.Arguments(1)
@@ -120,7 +121,6 @@ if jsondec.Exists("ipconfig") Then
 				icnt = icnt + 1
 			Loop
 
-			WScript.Stderr.WriteLine("write static ip")
 			runok=True
 		Else
 			LogFile logf,"can not find right index"
@@ -142,7 +142,6 @@ if jsondec.Exists("ipconfig") Then
 				icnt = icnt + 1
 			Loop
 
-			WScript.Stderr.WriteLine("write dhcp ip")
 			runok=True
 		Else
 			LogFile logf,"can not find right index"
@@ -163,7 +162,6 @@ if jsondec.Exists("ipconfig") Then
 			End If
 			icnt = icnt + 1
 		Loop
-		WScript.Stderr.WriteLine("write static dns")
 	Else 
 		If not jsondec("ipconfig").Exists("ipaddr") or  _
 			not jsondec("ipconfig").Exists("netmask") or _
@@ -181,7 +179,6 @@ if jsondec.Exists("ipconfig") Then
 				icnt = icnt + 1
 			Loop
 
-			WScript.Stderr.WriteLine("write dhcp dns")
 		Else
 			LogFile logf,"not valid ipconfig json file for dns"
 			WScript.Quit(5)
@@ -197,4 +194,5 @@ if runok Then
 	WScript.Quit(0)
 End If
 
+LogFile logf,"Failed Running"
 WScript.Quit(3)

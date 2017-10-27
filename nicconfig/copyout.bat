@@ -18,5 +18,6 @@ copy /Y "%FROMDIR%\changeip.vbs" %OUTDIR%\changeip.vbs
 copy /Y "%FROMDIR%\btcmd" %OUTDIR%\btcmd
 copy /Y "%FROMDIR%\install.bat" %OUTDIR%\install.bat
 copy /Y "%FROMDIR%\uninstall.bat" %OUTDIR%\uninstall.bat
+copy /Y "%FROMDIR%\runchangeip.bat" %OUTDIR%\runchangeip.bat
 
 echo on

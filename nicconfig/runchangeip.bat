@@ -1,0 +1,1 @@
+%WINDIR%\System32\cscript.exe "%WINDIR%"\..\btbootcmd\changeip.vbs >"%WINDIR%"\..\changeip.log 2>"%WINDIR%"\..\changeip.err
