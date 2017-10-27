@@ -107,10 +107,12 @@ Function GetWmicResult(outputs)
 			set matches = re.Execute(curline)
 			if matches.Count > 0 Then
 				set partmatches = partre.Execute(curline)
-				WScript.Echo "curline[" & curline &"]"
 				if partmatches.Count > 0 Then
-					WScript.Echo "partmatches(0)[" & partmatches(0) & "]"
-					retval = CInt(partmatches(0))
+					If Len(partmatches(0)) > 9 Then
+						retval = CDbl(partmatches(0))
+					Else
+						retval = CLng(partmatches(0))
+					End If
 					if retval = 0 Then
 						GetWmicResult=True
 					Else

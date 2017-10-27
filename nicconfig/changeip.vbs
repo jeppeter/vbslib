@@ -121,6 +121,7 @@ if jsondec.Exists("ipconfig") Then
 					Exit Do
 				End If
 				icnt = icnt + 1
+				WScript.Sleep 3000
 			Loop
 
 			icnt = 0
@@ -134,6 +135,7 @@ if jsondec.Exists("ipconfig") Then
 					Exit Do
 				End If
 				icnt = icnt + 1
+				WScript.Sleep 3000
 			Loop
 
 			runok=True
@@ -155,6 +157,7 @@ if jsondec.Exists("ipconfig") Then
 					Exit Do
 				End If
 				icnt = icnt + 1
+				WScript.Sleep 3000
 			Loop
 
 			runok=True
@@ -176,6 +179,7 @@ if jsondec.Exists("ipconfig") Then
 				Exit Do
 			End If
 			icnt = icnt + 1
+			WScript.Sleep 3000
 		Loop
 	Else 
 		If not jsondec("ipconfig").Exists("ipaddr") or  _
@@ -192,6 +196,7 @@ if jsondec.Exists("ipconfig") Then
 					Exit Do
 				End If
 				icnt = icnt + 1
+				WScript.Sleep 3000
 			Loop
 
 		Else
