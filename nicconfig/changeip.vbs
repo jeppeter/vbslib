@@ -31,13 +31,13 @@ dim retval
 dim json
 dim countmax
 dim icnt
+dim waitsleep
+dim lasterrmsg
 
 countmax = 5
 windir = GetEnv("WINDIR")
 
 If IsNull(windir) Then
-	logf = "..\iplog.txt"
-	LogFile logf,"can not find WINDIR"
 	WScript.Echo "can not find WINDIR"
 	Wscript.Quit(3)
 End If
@@ -76,6 +76,43 @@ if IsNull(jsondec) or IsEmpty(jsondec) Then
 End If
 
 runok=False
+
+
+If jsondec.Exists("ipconfig") Then
+	icnt = 0
+	waitsleep = False
+	lasterrmsg = "first start"
+	Do While True
+		icnt = icnt + 1
+		If waitsleep Then
+			WScript.Sleep 5000
+		End If
+
+		If icnt >= countmax Then
+			LogFile logf,"on max " & lasterrmsg
+			WScript.Echo lasterrmsg
+			WScript.Quit(3)
+		End If
+
+		If jsondec("ipconfig").Exists("macaddr") Then
+			index=GetInterfaceIndexByMac(jsondec("ipconfig")("macaddr"))
+		Else
+			index=GetInterfaceIndexByFirst()
+		End If
+
+		If index = "-1" Then
+			if jsondec("ipconfig").Exists("macaddr") Then
+				lasterrmsg = "can not find [" & jsondec("ipconfig").Exists("macaddr") &"]"
+			Else
+				lasterrmsg = "can not find first ipenabled ethernet card"
+			End If
+			continue
+		End If
+
+
+	Loop
+End If
+
 
 if jsondec.Exists("ipconfig") Then
 	icnt = 0 
