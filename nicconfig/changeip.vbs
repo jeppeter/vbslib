@@ -77,19 +77,20 @@ End If
 
 runok=False
 
-
 If jsondec.Exists("ipconfig") Then
 	icnt = 0
 	waitsleep = False
 	lasterrmsg = "first start"
+	countmax=60
 	Do While True
 		icnt = icnt + 1
 		If waitsleep Then
 			WScript.Sleep 5000
 		End If
+		waitsleep=True
 
 		If icnt >= countmax Then
-			LogFile logf,"on max " & lasterrmsg
+			LogFile logf,lasterrmsg
 			WScript.Echo lasterrmsg
 			WScript.Quit(3)
 		End If
@@ -102,146 +103,66 @@ If jsondec.Exists("ipconfig") Then
 
 		If index = "-1" Then
 			if jsondec("ipconfig").Exists("macaddr") Then
-				lasterrmsg = "can not find [" & jsondec("ipconfig").Exists("macaddr") &"]"
+				lasterrmsg = "[" & icnt & "] can not find [" & jsondec("ipconfig").Exists("macaddr") &"]"
 			Else
-				lasterrmsg = "can not find first ipenabled ethernet card"
+				lasterrmsg = "[" & icnt & "] can not find first ipenabled ethernet card"
 			End If
+			WScript.Echo lasterrmsg
 			continue
 		End If
 
+		if jsondec("ipconfig").Exists("ipaddr") and _
+			jsondec("ipconfig").Exists("netmask") and _
+			jsondec("ipconfig").Exists("gateway") Then
 
-	Loop
-End If
+			retval = SetIpNetMask(index,jsondec("ipconfig")("ipaddr"), jsondec("ipconfig")("netmask"))
+			If not retval Then
+				lasterrmsg = "[" & icnt & "] can not set ipaddr[" & jsondec("ipconfig")("ipaddr") & "] netmask[" & jsondec("ipconfig")("netmask") & "]"
+				WScript.Echo lasterrmsg
+				continue
+			End If
 
-
-if jsondec.Exists("ipconfig") Then
-	icnt = 0 
-	Do While True
-		If icnt >= 20 Then
-			LogFile logf,"can not get mac index"
-			WScript.Quit(5)
-		End If
-
-		if jsondec("ipconfig").Exists("macaddr") Then
-			index=GetInterfaceIndexByMac(jsondec("ipconfig")("macaddr"))
-			if index = "-1" Then
-				' we not find ,so delete the File
-				LogFile logf,"can not find macaddr " & FormatArray(jsondec("ipconfig")("macaddr"))
-				DeleteFileSafe(ipfile)
-				WScript.Quit(3)
+			retval = retval = SetGateWay(index,jsondec("ipconfig")("gateway"))
+			If not retval Then
+				lasterrmsg = "[" & icnt & "] can not set gateway[" & jsondec("ipconfig")("gateway") & "]"
+				WScript.Echo lasterrmsg
+				continue
 			End If
 		Else
-			index=GetInterfaceIndexByFirst()
-		End If
-		
-		if index <> "-1" Then
-			Exit Do
-		End If
-
-		icnt = icnt + 1
-		WScript.Sleep 5000
-	Loop
-
-	if jsondec("ipconfig").Exists("ipaddr") and _
-		jsondec("ipconfig").Exists("netmask") and _
-		jsondec("ipconfig").Exists("gateway") Then
-
-		if index <> "-1" Then
-			icnt = 0
-			Do While True
-				if icnt >= countmax Then
-					LogFile logf,"can not set ip "& FormatArray(jsondec("ipconfig")("ipaddr")) &" netmask " & FormatArray(jsondec("ipconfig")("netmask"))
-					WScript.Quit(3)
-				End If
-				retval = SetIpNetMask(index,jsondec("ipconfig")("ipaddr"), jsondec("ipconfig")("netmask"))
-				if retval Then
-					Exit Do
-				End If
-				icnt = icnt + 1
-				WScript.Sleep 3000
-			Loop
-
-			icnt = 0
-			Do While True
-				if icnt >= countmax Then
-					LogFile logf,"can not set gateway "& FormatArray(jsondec("ipconfig")("gateway"))
-					WScript.Quit(3)
-				End If
-				retval = SetGateWay(index,jsondec("ipconfig")("gateway"))
-				if retval Then
-					Exit Do
-				End If
-				icnt = icnt + 1
-				WScript.Sleep 3000
-			Loop
-
-			runok=True
-		Else
-			LogFile logf,"can not find right index"
-			WScript.Quit(4)
-		End If
-	Else
-		If index <> "-1" Then
-			icnt = 0
-			Do While icnt < 5
-				if icnt >= countmax Then
-					LogFile logf,"can not set ip dhcp"
-					WScript.Quit(3)
-				End If
-
-				retval = SetIpDhcp(index)
-				if retval Then
-					Exit Do
-				End If
-				icnt = icnt + 1
-				WScript.Sleep 3000
-			Loop
-
-			runok=True
-		Else
-			LogFile logf,"can not find right index"
-			WScript.Quit(4)
-		End If
-	End If
-
-	If jsondec("ipconfig").Exists("dns") Then
-		icnt = 0
-		Do While True
-			if icnt >= countmax Then
-				LogFile logf,"can not set dns "& FormatArray(jsondec("ipconfig")("dns"))
-				WScript.Quit(3)
+			retval = SetIpDhcp(index)
+			If not retval Then
+				lasterrmsg = "[" & icnt & "] can not set dhcp"
+				Wscript.Echo lasterrmsg
+				continue
 			End If
+		End If
+
+		If jsondec("ipconfig").Exists("dns") Then
 			retval = SetDns(index,jsondec("ipconfig")("dns"))
-			if retval Then
-				Exit Do
+			If not retval Then
+				lasterrmsg = "[" & icnt & "] can not set dns [" & jsondec("ipconfig")("dns") & "]"
+				WScript.Echo lasterrmsg
+				continue
 			End If
-			icnt = icnt + 1
-			WScript.Sleep 3000
-		Loop
-	Else 
-		If not jsondec("ipconfig").Exists("ipaddr") or  _
-			not jsondec("ipconfig").Exists("netmask") or _
-			not jsondec("ipconfig").Exists("gateway") Then
-			icnt = 0
-			Do While True
-				if icnt >= countmax Then
-					LogFile logf,"can not set dns dhcp"
-					WScript.Quit(3)
-				End If
-				retval = SetDnsDhcp(index)
-				if retval Then
-					Exit Do
-				End If
-				icnt = icnt + 1
-				WScript.Sleep 3000
-			Loop
-
 		Else
-			LogFile logf,"not valid ipconfig json file for dns"
-			WScript.Quit(5)
+			If not jsondec("ipconfig").Exists("ipaddr") or  _
+				not jsondec("ipconfig").Exists("netmask") or _
+				not jsondec("ipconfig").Exists("gateway") Then
+				retval = SetDnsDhcp(index)
+				If not retval Then
+					lasterrmsg = "[" & icnt & "] can not set dns dhcp"
+					WScript.Echo lasterrmsg
+					continue
+				End If
+			Else
+				LogFile logf,"invalid ipconfig for dns dhcp"
+				WScript.Quit(4)
+			End If
 		End If
-	End If
 
+		runok = True
+		Exit Do
+	Loop
 End If
 
 
