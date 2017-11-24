@@ -33,7 +33,8 @@ Function GetInterfaceIndexByFirst()
 	dim re
 	dim matches
 
-	runcmd = "wmic nicconfig where "  & chr(34) & "IPEnabled=true" & chr(34) & " Get Index"
+	' not including the vmware and virtualbox
+	runcmd = "wmic nicconfig where "  & chr(34) & "IPEnabled=true and ServiceName!='VBoxNetAdp' and ServiceName!='VMnetAdapter'" & chr(34) & " Get Index"
 	outputlines=RuncmdOutput(runcmd)
 	sarr=Split(outputlines,chr(10))
 	If Ubound(sarr) >= 2 and Len(sarr(1)) > 0 Then
