@@ -81,6 +81,7 @@ Func _Set_Verbose()
 EndFunc ; => _Set_verbose
 
 Func _Parse_Command_Line()
+#comments-start
 	Local $directives = [ _
 		"b|help|helpmode|False", _
 		"b|h|helpmode|False", _
@@ -97,6 +98,16 @@ Func _Parse_Command_Line()
 		"s|try|tries|3", _
 		"s|d|tries|3", _
 		"s|timeout|timeout|500", _
+		"s|t|timeout|500"]
+#comments-end
+	Local $directives = [ _
+		"b|h|helpmode|False", _
+		"s|v|verbose|0", _
+		"s|l|OverwriteLog", _
+		"s|f|AppendLog", _
+		StringFormat("s|u|user|%s", @UserName), _
+		StringFormat("s|n|newuser|TN%s", @UserName), _
+		"s|d|tries|3", _
 		"s|t|timeout|500"]
 	Local $cl = $CmdLine
 	Local $ret
