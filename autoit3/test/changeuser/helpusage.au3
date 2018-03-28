@@ -18,11 +18,13 @@ Func _Usage($ec=0,$fmt="", $prog=$CmdLine[0])
 	EndIf
 
 	_WinAPI_WriteConsole($fh, StringFormat("%s [OPTIONS]", $prog) & @CRLF)
-	_WinAPI_WriteConsole($fh, @CRLF)
-	_WinAPI_WriteConsole($fh, @CRLF)
-	_WinAPI_WriteConsole($fh, @CRLF)
-	_WinAPI_WriteConsole($fh, @CRLF)
-	_WinAPI_WriteConsole($fh, @CRLF)
+	_WinAPI_WriteConsole($fh, StringFormat("-help|-h                 to display this help information") & @CRLF)
+	_WinAPI_WriteConsole($fh, StringFormat("-user|-u user            to specified the user name") & @CRLF)
+	_WinAPI_WriteConsole($fh, StringFormat("-new|-n newuser          to specified the new user name") & @CRLF)
+	_WinAPI_WriteConsole($fh, StringFormat("-admin|-a admin          to specified the admin name") & @CRLF)
+	_WinAPI_WriteConsole($fh, StringFormat("-passwd|-p password      to specified the password") & @CRLF)
+	_WinAPI_WriteConsole($fh, StringFormat("-try|-d tries            to specified the tries default 3") & @CRLF)
+	_WinAPI_WriteConsole($fh, StringFormat("-timeout|-t timeout      to specified the timeout to wait default 500 millseconds") & @CRLF)
 
 	ExitApp $ec
 	return
@@ -30,5 +32,4 @@ EndFunc
 
 Func _Parse_Command_Line()
 	Local $i
-	For 
 EndFunc
