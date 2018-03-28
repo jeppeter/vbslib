@@ -89,9 +89,9 @@ Func _log4auto_AddLogFile($sFile,$isappend=True)
 
 	$mode = $FO_CREATEPATH 
 	If $isappend Then
-		$mode |= $FO_APPEND
+		$mode = $mode + $FO_APPEND
 	Else
-		$mode |= $FO_overwrite
+		$mode = $mode + $FO_overwrite
 	EndIf
 
 	$hd = FileOpen($sFile, $mode)
@@ -179,8 +179,8 @@ EndFunc
 ; Modified.......:
 ; Remarks .......:
 ; ===============================================================================================================================
-Func _log4a_Message($sMessage, $eLevel = $LOG4A_LEVEL_INFO, $file = @ScriptFullPath , $line=@ScriptLineNumber)
-	If $eLevel < $LOG4A_LEVEL_TRACE Or $eLevel > $LOG4A_LEVEL_FATAL Then Return SetError(1)
+Func _log4auto_Message($sMessage, $eLevel = $LOG4A_LEVEL_INFO, $file = @ScriptFullPath , $line=@ScriptLineNumber)
+	If $eLevel < $LOG4AUTO_LEVEL_TRACE Or $eLevel > $LOG4AUTO_LEVEL_FATAL Then Return SetError(1)
 
 	If $eLevel < $__LOG4AUTO_LEVEL Then
 		return SetError(0)
@@ -195,12 +195,13 @@ Func _log4a_Message($sMessage, $eLevel = $LOG4A_LEVEL_INFO, $file = @ScriptFullP
 		FileWrite($fh, $formatted & @CRLF)
 	Next
 
+
 	If $__log4auto_errhd <> -1 Then
-		_WinAPI_WriteConsole($fh, $formatted & @CRLF)
+		_WinAPI_WriteConsole($__log4auto_errhd, $formatted & @CRLF)
 	EndIf
 
 	if $__log4auto_backout Then
-		DllCall("kernel32.dll", "none", "OutputDebugString", "str", $formatted)
+		DllCall("kernel32.dll", "none", "OutputDebugString", "str", $formatted & @CRLF)
 	EndIf
 	return SetError(0)
 EndFunc   ;==>_log4auto_Message
@@ -221,7 +222,7 @@ EndFunc   ;==>_log4auto_Message
 ; Remarks .......:
 ; ===============================================================================================================================
 Func _log4auto_Trace($sMessage, $file=@ScriptFullPath,$line=@ScriptLineNumber)
-	_log4auto_Message($sMessage, $LOG4A_LEVEL_TRACE, $file,$line)
+	_log4auto_Message($sMessage, $LOG4AUTO_LEVEL_TRACE, $file,$line)
 EndFunc   ;==>_log4auto_Trace
 
 ; #FUNCTION# ====================================================================================================================
@@ -239,7 +240,7 @@ EndFunc   ;==>_log4auto_Trace
 ; Remarks .......:
 ; ===============================================================================================================================
 Func _log4auto_Debug($sMessage, $file=@ScriptFullPath,$line=@ScriptLineNumber)
-	_log4auto_Message($sMessage, $LOG4A_LEVEL_DEBUG, $file,$line)
+	_log4auto_Message($sMessage, $LOG4AUTO_LEVEL_DEBUG, $file,$line)
 EndFunc   ;==>_log4auto_Debug
 
 ; #FUNCTION# ====================================================================================================================
@@ -257,7 +258,7 @@ EndFunc   ;==>_log4auto_Debug
 ; Remarks .......:
 ; ===============================================================================================================================
 Func _log4auto_Info($sMessage,$file=@ScriptFullPath,$line=@ScriptLineNumber)
-	_log4auto_Message($sMessage, $LOG4A_LEVEL_INFO, $file,$line)
+	_log4auto_Message($sMessage, $LOG4AUTO_LEVEL_INFO, $file,$line)
 EndFunc   ;==>_log4auto_Info
 
 ; #FUNCTION# ====================================================================================================================
@@ -275,7 +276,7 @@ EndFunc   ;==>_log4auto_Info
 ; Remarks .......:
 ; ===============================================================================================================================
 Func _log4auto_Warn($sMessage, $file=@ScriptFullPath,$line=@ScriptLineNumber)
-	_log4auto_Message($sMessage, $LOG4A_LEVEL_WARN, $file,$line)
+	_log4auto_Message($sMessage, $LOG4AUTO_LEVEL_WARN, $file,$line)
 EndFunc   ;==>_log4auto_Warn
 
 ; #FUNCTION# ====================================================================================================================
@@ -293,7 +294,7 @@ EndFunc   ;==>_log4auto_Warn
 ; Remarks .......:
 ; ===============================================================================================================================
 Func _log4auto_Error($sMessage, $file=@ScriptFullPath,$line=@ScriptLineNumber)
-	_log4auto_Message($sMessage, $LOG4A_LEVEL_ERROR, $file,$line)
+	_log4auto_Message($sMessage, $LOG4AUTO_LEVEL_ERROR, $file,$line)
 EndFunc   ;==>_log4auto_Error
 
 ; #FUNCTION# ====================================================================================================================
@@ -311,7 +312,7 @@ EndFunc   ;==>_log4auto_Error
 ; Remarks .......:
 ; ===============================================================================================================================
 Func _log4auto_Fatal($sMessage, $file=@ScriptFullPath,$line=@ScriptLineNumber)
-	_log4a_Message($sMessage, $LOG4A_LEVEL_FATAL, $file,$line)
+	_log4auto_Message($sMessage, $LOG4AUTO_LEVEL_FATAL, $file,$line)
 EndFunc   ;==>_log4auto_Fatal
 
 #endregion Message Functions
@@ -319,12 +320,12 @@ EndFunc   ;==>_log4auto_Fatal
 #region Internal Functions
 
 Func __log4auto_FormatMessage($sMessage, $sLevel,$file=@ScriptFullPath,$line=@ScriptLineNumber)
-	Local $sFormatted = $__LOG4A_FORMAT
+	Local $sFormatted = $__LOG4AUTO_FORMAT
 
 	$sFormatted = StringReplace($sFormatted, "${file}", $file)
 	$sFormatted = StringReplace($sFormatted, "${line}", $line)
 	$sFormatted = StringReplace($sFormatted, "${date}", _
-		StringFormat("%02d\\%02d\\%04d %02d:%02d:%02d", @MON, @MDAY, @YEAR, @HOUR, @MIN, @SEC))
+		StringFormat("%04d/%02d/%02d %02d:%02d:%02d", @YEAR, @MON, @MDAY,  @HOUR, @MIN, @SEC))
 	$sFormatted = StringReplace($sFormatted, "${host}", @ComputerName)
 	$sFormatted = StringReplace($sFormatted, "${level}", $sLevel)
 	$sFormatted = StringReplace($sFormatted, "${message}", $sMessage)
