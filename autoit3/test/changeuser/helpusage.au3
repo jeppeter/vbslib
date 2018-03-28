@@ -5,7 +5,7 @@
 
 #include <WinAPIHObj.au3>
 #include <WinAPIProc.au3>
-#include <ParseCmdLine.au3>
+#include "ParseCmdLine.au3"
 
 
 AutoItSetOption("MustDeclareVars",1)
