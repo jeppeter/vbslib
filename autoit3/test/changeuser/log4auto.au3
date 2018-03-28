@@ -19,10 +19,11 @@
 ;_log4auto_Info
 ;_log4auto_Message
 ;_log4auto_SetFormat
-;_log4auto_SetLogFile
-;_log4auto_SetOutput
+;_log4auto_AddLogFile
+;_log4auto_RmLogFile
 ;_log4auto_Trace
 ;_log4auto_Warn
+;_log4auto_SetLogLevel
 ; ===============================================================================================================================
 
 ; Logging Enumerations

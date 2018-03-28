@@ -6,6 +6,7 @@
 #include <WinAPIHObj.au3>
 #include <WinAPIProc.au3>
 #include "ParseCmdLine.au3"
+#include "log4auto.au3"
 
 
 AutoItSetOption("MustDeclareVars",1)
@@ -19,6 +20,9 @@ Global $admin
 Global $password
 Global $tries
 Global $timeout
+Global $verbose
+Global $AppendLog
+Global $OverwriteLog
 
 Func _Usage($ec=0,$fmt="", $prog=@ScriptFullPath)
 	Local $fh = _WinAPI_GetStdHandle(2)
@@ -33,6 +37,8 @@ Func _Usage($ec=0,$fmt="", $prog=@ScriptFullPath)
 
 	_WinAPI_WriteConsole($fh, StringFormat("%s [OPTIONS]", $prog) & @CRLF)
 	_WinAPI_WriteConsole($fh, StringFormat("-help|-h                 to display this help information") & @CRLF)
+	_WinAPI_WriteConsole($fh, StringFormat("-overlog|-l file         to specified log file to overwrite default[]") & @CRLF)
+	_WinAPI_WriteConsole($fh, StringFormat("-appendlog|-f file       to specified log file to append default[]") & @CRLF)
 	_WinAPI_WriteConsole($fh, StringFormat("-user|-u user            to specified the user name default[%s]",  @UserName) & @CRLF)
 	_WinAPI_WriteConsole($fh, StringFormat("-new|-n newuser          to specified the new user name default[TN%s]",  @UserName) & @CRLF)
 	_WinAPI_WriteConsole($fh, StringFormat("-admin|-a admin          to specified the admin name default Administrator") & @CRLF)
@@ -44,10 +50,43 @@ Func _Usage($ec=0,$fmt="", $prog=@ScriptFullPath)
 	return
 EndFunc
 
+Func _Set_Verbose()
+	Local $vmode = $LOG4AUTO_LEVEL_ERROR
+
+	If $verbose <= 0 Then
+		$vmode = $LOG4AUTO_LEVEL_ERROR
+	ElseIf $verbose = 1 Then
+		$vmode = $LOG4AUTO_LEVEL_WARN
+	ElseIf $verbose = 2 Then
+		$vmode = $LOG4AUTO_LEVEL_INFO
+	ElseIf $verbose = 3 Then
+		$vmode = $LOG4AUTO_LEVEL_DEBUG
+	Else
+		$vmode = $LOG4AUTO_LEVEL_TRACE
+	EndIf
+
+	_log4auto_SetLogLevel($vmode)
+	If $OverwriteLog <> "" Then
+		_log4auto_AddLogFile($OverwriteLog,False)
+	EndIf
+
+	If $AppendLog <> "" Then
+		_log4auto_AddLogFile($AppendLog, True)
+	EndIf
+
+	return
+EndFunc ; => _Set_verbose
+
 Func _Parse_Command_Line()
 	Local $directives = [ _
 		"b|help|helpmode|False", _
 		"b|h|helpmode|False", _
+		"s|verbose|verbose|0", _
+		"s|v|verbose|0", _
+		"s|overlog|OverwriteLog", _
+		"s|l|OverwriteLog", _
+		"s|appendlog|AppendLog" , _
+		"s|f|AppendLog", _
 		StringFormat("s|user|user|%s", @UserName), _
 		StringFormat("s|u|user|%s", @UserName), _
 		StringFormat("s|new|newuser|TN%s", @UserName), _
@@ -66,5 +105,7 @@ Func _Parse_Command_Line()
 	If $helpmode Then
 		_Usage(0,"")
 	EndIf
+
+	_Set_Verbose()
 	return
 EndFunc
