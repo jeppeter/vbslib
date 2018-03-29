@@ -45,6 +45,7 @@ Func _GetRunNetPlWiz()
 			ExitLoop
 		EndIf
 		_log4auto_FATAL(StringFormat("can not find [%s] window [%d]", $netplwiz, $hWnds[0]),"main.au3")
+		Sleep(2000)
 		$i = $i + 1
 	Wend
 
@@ -57,11 +58,43 @@ Func _GetRunNetPlWiz()
 	return $hwnd
 EndFunc
 
+Const $CHECK_CONTROL_ID = "[ID:1022]"
+
+Func _GetUserName($hwnd,$inuser)
+	Local $retuser=""
+	Local $chkctrl
+	Local $chked
+	$chkctrl = ControlGetHandle($hwnd,"",$CHECK_CONTROL_ID)
+	If $chkctrl = 0 Then
+		_log4auto_ERROR(StringFormat("can not find %s error[%d]", $CHECK_CONTROL_ID, @Error), "main.au3")
+		return $retuser
+	EndIf
+
+	_log4auto_DEBUG(StringFormat("get %s [%s]", $CHECK_CONTROL_ID,$chkctrl), "main.au3")
+
+	$chked=ControlCommand($hwnd, "", $CHECK_CONTROL_ID, "IsChecked")
+	If $chked = 0 Then
+		_log4auto_TRACE(StringFormat("%s not checked", $CHECK_CONTROL_ID), "main.au3")
+		ControlClick($hwnd, "", $CHECK_CONTROL_ID,"left",1,2,2)
+		Sleep(500)
+		$chked=ControlCommand($hwnd, "", $CHECK_CONTROL_ID, "IsChecked")
+		If $chked Then
+			_log4auto_ERROR(StringFormat("can not make %s checked", $CHECK_CONTROL_ID), "main.au3")
+			return $retuser
+		EndIf
+	EndIf
+
+	return $retuser
+EndFunc
+
 
 Local $hwnd
+Local $retuser
 
 $hwnd = _GetRunNetPlWiz()
 If $hwnd = 0 Then
 	Exit 5
 EndIf
 ; now we shoule give the 
+
+$retuser = _GetUserName($hwnd,$user)
