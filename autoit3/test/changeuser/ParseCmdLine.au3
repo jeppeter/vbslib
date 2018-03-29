@@ -5,6 +5,11 @@ Func _If2($b,$t,$f)
 	Return $f
 EndFunc
 
+Func __inner_Debug($s)
+	return
+	ConsoleWrite($s)
+EndFunc
+
 ; _ParseCmdLine: parses command line switches
 ; $cl[] is a copy of $CmdLine[] (or a another suitably initialised array)
 ; $args[] is an array with the command line arguments (see example code)
@@ -19,7 +24,7 @@ EndFunc
 Func _ParseCmdLine(ByRef $cl,$args,$switch="-",$cs=0)
 	Local $i,$j,$a,$v,$s
 	If Not IsArray($cl) And Not IsArray($args) Then Return SetError(1,0,0)
-	For $i=0 To UBound($args)-1                 ; outer loop over all args
+	For $i=0 To UBound($args)-1
 		$a=StringSplit($args[$i],"|")
 		Switch $a[0]
 			Case 3
@@ -29,10 +34,22 @@ Func _ParseCmdLine(ByRef $cl,$args,$switch="-",$cs=0)
 			Case Else
 				Return SetError(2,$i,0)
 		EndSwitch
+		__inner_Debug(StringFormat("[%d][%s]=[%s]", $i,$a[3], $v) & @CRLF)
 		Assign($a[3],$v,2)                        ; assign value in case the switch is not encountered
+	Next
+
+
+	For $i=0 To UBound($args)-1                 ; outer loop over all args
+		$a=StringSplit($args[$i],"|")
 		If $cs=0 Then $a[2]=StringLower($a[2])
-		For $j=1 To $cl[0]                        ; inner loop over command line args
-			If $cl[$j]="" Then ContinueLoop
+		$j = 1
+		__inner_Debug(StringFormat("$cl[0]=[%s]", $cl[0]) & @CRLF)
+		While $j < Ubound($cl)
+			__inner_Debug(StringFormat("$cl[%d]=[%s]", $j, $cl[$j]) & @CRLF)
+			If $cl[$j]="" Then 
+				$j = $j + 1
+				ContinueLoop
+			EndIf
 			If StringLeft($cl[$j],StringLen($switch))=$switch Then ; check switch char
 				$s=StringMid($cl[$j],StringLen($switch)+1,StringLen($a[2]))
 				If $cs=0 Then $s=StringLower($s)
@@ -40,14 +57,27 @@ Func _ParseCmdLine(ByRef $cl,$args,$switch="-",$cs=0)
 					$s=StringMid($cl[$j],StringLen($switch)+StringLen($a[2])+1)
 					If $a[1]="b" Then                   ; boolean?
 						If $s<>"" Then Return SetError(3,$j,0)
-						Assign($a[3],_If2($v,False,True))
+						__inner_Debug(StringFormat("[%s]=[%s]", $a[3], _If2($v,False,True)) & @CRLF)
+						If $a[4] = "True" Then
+							$v=False
+						Else
+							$v=True
+						EndIf
+						Assign($a[3],$v)
 					Else                                ; string
-						Assign($a[3],$s)
+						If ($j) >= $cl[0] Then
+							return SetError(1,0,0)
+						EndIf
+						__inner_Debug(StringFormat("[%s]=[%s]", $a[3], $cl[($j+1)]) & @CRLF)
+						Assign($a[3],$cl[($j+1)])
+						$cl[$j] = ""
+						$j = $j + 1
 					EndIf
 					$cl[$j]="" ; clear this entry
 				EndIf
 			EndIf
-		Next
+			$j = $j + 1
+		Wend
 	Next
 	$j=1
 	For $i=1 To $cl[0] ; clean up $cl[]

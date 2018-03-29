@@ -1,7 +1,5 @@
 #include-once
 
-#AutoIt3Wrapper_Run_Au3Stripper=y
-#Au3Stripper_Parameters=/mo /SCI=1
 
 #include <WinAPIHObj.au3>
 #include <WinAPIProc.au3>
@@ -65,7 +63,7 @@ Func _Set_Verbose()
 		$vmode = $LOG4AUTO_LEVEL_TRACE
 	EndIf
 
-	ConsoleWrite(StringFormat("verbose [%s]", $verbose) & @CRLF)
+	ConsoleWrite(StringFormat("verbose [%d]", $verbose) & @CRLF)
 	_log4auto_SetLogLevel($vmode)
 	ConsoleWrite(StringFormat("OverwriteLog [%s]", $OverwriteLog) & @CRLF)
 	If $OverwriteLog <> "" Then
@@ -82,7 +80,29 @@ EndFunc ; => _Set_verbose
 
 Func _Parse_Command_Line()
 #comments-start
-	Local $directives = [ _
+
+	Local $directives[8] = [ _
+		"b|h|helpmode|False", _
+		"s|v|verbose|0", _
+		"s|l|OverwriteLog|", _
+		"s|f|AppendLog|", _
+		StringFormat("s|u|user|%s", @UserName), _
+		StringFormat("s|n|newuser|TN%s", @UserName), _
+		"s|d|tries|3", _
+		"s|t|timeout|500"]
+	Local $directives[8]=[ _ ; Watch out: the initialisers for -d and -t require 'AutoItSetOption("ExpandVarStrings",1)')!
+    "b|h|helpmode|False", _   ; boolean -nodebug: $DebugMode is True if switch is not specified
+    "s|v|verbose|0", _            ; boolean -w: $Write is False if switch is not specified
+    "s|l|OverwriteLog", _       ; string -d...: $Dir is Scriptdir if switch is not specified
+    "s|f|AppendLog|", _       ; string -u...: $User is St. Jacques if switch is not specified
+    StringFormat("s|u|user|%s", @UserName) , _ ; string -t...: $Time is current time if switch is not specified
+    StringFormat("s|n|newuser|TN%s", @UserName), _
+    "s|d|tries|3", _
+    "s|t|timeout|500" _
+]
+
+#comments-end
+	Local $directives[16] = [ _
 		"b|help|helpmode|False", _
 		"b|h|helpmode|False", _
 		"s|verbose|verbose|0", _
@@ -99,16 +119,7 @@ Func _Parse_Command_Line()
 		"s|d|tries|3", _
 		"s|timeout|timeout|500", _
 		"s|t|timeout|500"]
-#comments-end
-	Local $directives = [ _
-		"b|h|helpmode|False", _
-		"s|v|verbose|0", _
-		"s|l|OverwriteLog", _
-		"s|f|AppendLog", _
-		StringFormat("s|u|user|%s", @UserName), _
-		StringFormat("s|n|newuser|TN%s", @UserName), _
-		"s|d|tries|3", _
-		"s|t|timeout|500"]
+
 	Local $cl = $CmdLine
 	Local $ret
 	$ret = _ParseCmdLine($cl,$directives)
@@ -120,6 +131,7 @@ Func _Parse_Command_Line()
 		_Usage(0,"")
 	EndIf
 
+	ConsoleWrite(StringFormat("cl %s",$cl) & @CRLF)
 	_Set_Verbose()
 	return
 EndFunc
