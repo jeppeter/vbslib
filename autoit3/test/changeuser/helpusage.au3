@@ -63,14 +63,11 @@ Func _Set_Verbose()
 		$vmode = $LOG4AUTO_LEVEL_TRACE
 	EndIf
 
-	ConsoleWrite(StringFormat("verbose [%d]", $verbose) & @CRLF)
 	_log4auto_SetLogLevel($vmode)
-	ConsoleWrite(StringFormat("OverwriteLog [%s]", $OverwriteLog) & @CRLF)
 	If $OverwriteLog <> "" Then
 		_log4auto_AddLogFile($OverwriteLog,False)
 	EndIf
 
-	ConsoleWrite(StringFormat("AppendLog [%s]", $AppendLog) & @CRLF)
 	If $AppendLog <> "" Then
 		_log4auto_AddLogFile($AppendLog, True)
 	EndIf
@@ -131,7 +128,6 @@ Func _Parse_Command_Line()
 		_Usage(0,"")
 	EndIf
 
-	ConsoleWrite(StringFormat("cl %s",$cl) & @CRLF)
 	_Set_Verbose()
 	return
 EndFunc
