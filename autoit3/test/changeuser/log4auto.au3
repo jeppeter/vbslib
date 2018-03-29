@@ -180,7 +180,7 @@ EndFunc
 ; Modified.......:
 ; Remarks .......:
 ; ===============================================================================================================================
-Func _log4auto_Message($sMessage, $eLevel = $LOG4A_LEVEL_INFO, $file = @ScriptFullPath , $line=@ScriptLineNumber)
+Func _log4auto_Message($sMessage, $eLevel = $LOG4AUTO_LEVEL_INFO, $file = @ScriptFullPath , $line=@ScriptLineNumber)
 	If $eLevel < $LOG4AUTO_LEVEL_TRACE Or $eLevel > $LOG4AUTO_LEVEL_FATAL Then Return SetError(1)
 
 	If $eLevel < $__LOG4AUTO_LEVEL Then
