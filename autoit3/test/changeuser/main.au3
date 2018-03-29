@@ -2,6 +2,8 @@
 #include "log4auto.au3"
 #include <File.au3>
 #include "procapi.au3"
+#include <GuiButton.au3>
+
 
 
 _Parse_Command_Line()
@@ -64,6 +66,7 @@ Func _GetUserName($hwnd,$inuser)
 	Local $retuser=""
 	Local $chkctrl
 	Local $chked
+	Local $i
 	$chkctrl = ControlGetHandle($hwnd,"",$CHECK_CONTROL_ID)
 	If $chkctrl = 0 Then
 		_log4auto_ERROR(StringFormat("can not find %s error[%d]", $CHECK_CONTROL_ID, @Error), "main.au3")
@@ -72,13 +75,24 @@ Func _GetUserName($hwnd,$inuser)
 
 	_log4auto_DEBUG(StringFormat("get %s [%s]", $CHECK_CONTROL_ID,$chkctrl), "main.au3")
 
-	$chked=ControlCommand($hwnd, "", $CHECK_CONTROL_ID, "IsChecked")
-	If $chked = 0 Then
+	$chked=_GUICtrlButton_GetCheck($chkctrl)
+	_log4auto_TRACE(StringFormat("%s state [%s]", $CHECK_CONTROL_ID,$chked), "main.au3")
+	If BitAND($chked , $BST_CHECKED) = 0  Then
 		_log4auto_TRACE(StringFormat("%s not checked", $CHECK_CONTROL_ID), "main.au3")
-		ControlClick($hwnd, "", $CHECK_CONTROL_ID,"left",1,2,2)
-		Sleep(500)
-		$chked=ControlCommand($hwnd, "", $CHECK_CONTROL_ID, "IsChecked")
-		If $chked Then
+		For $i=0 To $tries
+			;ControlClick($hwnd, "", $CHECK_CONTROL_ID,"left",1,2,2)
+			_GUICtrlButton_SetCheck($chkctrl)
+			Sleep(500)
+			$chked=_GUICtrlButton_GetCheck($chkctrl)
+			_log4auto_TRACE(StringFormat("%s state [%s]", $CHECK_CONTROL_ID, $chked), "main.au3")
+			If BitAND($chked , $BST_CHECKED) = $BST_CHECKED Then
+				ExitLoop
+			EndIf
+			Sleep(1000)
+			_log4auto_DEBUG(StringFormat("not checked %s", $CHECK_CONTROL_ID), "main.au3")
+		Next
+
+		If BitAND($chked , $BST_CHECKED) = 0 Then
 			_log4auto_ERROR(StringFormat("can not make %s checked", $CHECK_CONTROL_ID), "main.au3")
 			return $retuser
 		EndIf
