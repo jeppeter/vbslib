@@ -539,6 +539,71 @@ Function CheckGitVersion(basever)
     CheckGitVersion=false
 End Function
 
+Class PythonExtractVersion
+    Private m_version
+    Public Function FilterVersion(line)
+        dim re,result,num,a,resa,b
+        set re = new regexp
+        '  to get the gox.x.x version number
+        re.Pattern = "Python\s+([0-9]+((\.[0-9]*)+))$"
+        set result = re.Execute(line)   
+        num = 0
+        if Not IsEmpty(result) Then
+            for Each a in result
+                re.Pattern = "[0-9]+((\.[0-9]+)+)"
+                set resa = re.Execute(a)
+                if Not IsEmpty(resa) Then
+                    for Each b in resa
+                        b = Trim(b)
+                        m_version=b
+                    Next
+                End If
+            Next
+        End If
+    End Function
+    Public Function  GetVersion()
+        if IsEmpty(m_version) Then
+            GetVersion="0.0.0"
+        Else
+            GetVersion=m_version
+        End If
+    End Function
+End Class
+
+dim pythonversion
+
+Function CheckPythonVersion(basever)
+    dim patharr
+    dim pathval
+    dim curpath
+    dim curcmd
+    pathval = GetEnv("PATH")
+    If IsNull(pathval) Then
+        CheckPythonVersion=false
+        Exit Function
+    End If
+
+    patharr = Split(pathval,";")
+    For Each curpath in patharr
+        If FileExists( curpath & "\" & "python.exe") Then
+            curcmd = curpath & "\" & "python.exe"
+            set pythonversion = new PythonExtractVersion
+            call GetRunOut(curcmd,"-V","FilterText","pythonversion")
+            WScript.Stdout.Writeline("python version " & pythonversion.GetVersion())
+            If VersionCompare(basever,pythonversion.GetVersion()) Then
+                ' now to test for the version
+                CheckPythonVersion=true
+            Else
+                CheckPythonVersion=false
+            End If
+            Exit Function
+        End If
+    Next
+
+    CheckPythonVersion=false
+End Function
+
+
 Function Usage(ec,fmt)
     dim fh
     set fh = WScript.Stderr
@@ -555,12 +620,13 @@ Function Usage(ec,fmt)
     fh.Writeline(chr(9) &"make_platform  version       to check running platform environment")
     fh.Writeline(chr(9) &"visual_studio version        to check for visual studio environment")
     fh.Writeline(chr(9) &"golang   version             to check for golang environment")
-    fh.Writeline(chr(9) &"node  version                to check for node js environment")
-    fh.Writeline(chr(9) &"npm3  version                to check npm3 environment")
-    fh.Writeline(chr(9) &"npm   version                to check npm environment")
-    fh.Writeline(chr(9) &"cmake version                to check for cmake environment")
-    fh.Writeline(chr(9) &"nsis  version                to check for nsis environment")
-    fh.Writeline(chr(9) &"git   version                to check for git environment")
+    fh.Writeline(chr(9) &"node     version             to check for node js environment")
+    fh.Writeline(chr(9) &"npm3     version             to check npm3 environment")
+    fh.Writeline(chr(9) &"npm      version             to check npm environment")
+    fh.Writeline(chr(9) &"cmake    version             to check for cmake environment")
+    fh.Writeline(chr(9) &"nsis     version             to check for nsis environment")
+    fh.Writeline(chr(9) &"git      version             to check for git environment")
+    fh.Writeline(chr(9) &"python   version             to check for git environment")
     WScript.Quit(ec)
 End Function
 
@@ -670,6 +736,17 @@ Function ParseArgs(args)
             retval = CheckGitVersion(optarg)
             If Not retval Then
                 WScript.Stderr.Writeline("must install git for version " & optarg)
+                WScript.Quit(3)
+            End If
+            i = i + 1
+        elseif args(i) = "python" Then
+            If (i+1) > j Then
+                Usage 3 , "python need version"
+            End If
+            optarg = args(i+1)
+            retval = CheckPythonVersion(optarg)
+            If Not retval Then
+                WScript.Stderr.Writeline("must install python for version " & optarg)
                 WScript.Quit(3)
             End If
             i = i + 1
