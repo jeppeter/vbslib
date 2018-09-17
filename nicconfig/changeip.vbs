@@ -159,7 +159,7 @@ If jsondec.Exists("ipconfig") Then
 	icnt = 0
 	waitsleep = False
 	lasterrmsg=""
-	countmax=60
+	countmax=300
 	Do While True
 		icnt = icnt + 1
 		If waitsleep Then
