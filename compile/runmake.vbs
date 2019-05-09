@@ -266,7 +266,14 @@ If argobj.Value("novc") Then
 Else
 	runcon = ""
 	if vsver = "12.0" or vsver = "14.0" Then
-		runcon = runcon & "call " & chr(34) & basedir & "\VC\vcvarsall.bat" & chr(34) & " "  & argobj.Value("vcmode")  & chr(13) & chr(10)
+		if argobj.Value("vcmode") = "amd64" Then
+			runcon = runcon & "call " & chr(34) & basedir & "\VC\vcvarsall.bat" & chr(34) & " "  & "amd64"  & chr(13) & chr(10)
+		elseif argobj.Value("vcmode") = "amd64_x86" Then
+			runcon = runcon & "call " & chr(34) & basedir & "\VC\vcvarsall.bat" & chr(34) & " "  & "amd64_x86"  & chr(13) & chr(10)
+		Else
+			Wscript.Stderr.Writeline("unknown vcmode(" & argobj.Value("vcmode") & ")")
+			Wscript.Exit(4)
+		End If
 	Elseif vsver = "15.0" Then
 		runcon = runcon & "call " & chr(34) & basedir & "\VC\Auxiliary\Build\vcvarsall.bat" & chr(34) & " " & argobj.Value("vcmode") & chr(13) & chr(10)
 	Else
