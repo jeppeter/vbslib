@@ -267,7 +267,7 @@ Else
 	runcon = ""
 	if vsver = "12.0" or vsver = "14.0" Then
 		runcon = runcon & "call " & chr(34) & basedir & "\VC\vcvarsall.bat" & chr(34) & " "  & argobj.Value("vcmode")  & chr(13) & chr(10)
-	Elseif vsver = "15.0" Then
+	Elseif vsver = "15.0" or vsver = "16.0" Then
 		runcon = runcon & "call " & chr(34) & basedir & "\VC\Auxiliary\Build\vcvarsall.bat" & chr(34) & " " & argobj.Value("vcmode") & chr(13) & chr(10)
 	Else
 		Wscript.Stderr.Writeline("vsver["&vsver&"]not supported")
