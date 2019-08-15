@@ -44,13 +44,12 @@ Function FormatCmakeBatch(outfile,vsver,basedir,compiletarget,platform,abssrc,ab
 	End If
 	cmdline = cmdline & " " & abssrc 
 	fh.WriteLine(cmdline)
-
 	fh.Close
 	set fso = Nothing
 	set fh = Nothing	
 End Function
 
-Function CmakeRun(vsver,basedir,,compiletarget,platform,srcdir,dstdir,args)
+Function CmakeRun(vsver,basedir,compiletarget,platform,srcdir,dstdir,args)
 	dim cmd,retdir,curd,absdst,abssrc,unum
 	dim batchfile
 	retdir = GetCwd()
@@ -59,7 +58,7 @@ Function CmakeRun(vsver,basedir,,compiletarget,platform,srcdir,dstdir,args)
 	' for \ is 92
 	batchfile = absdst & chr(92) & "cmakerun.bat"
 	Chdir(absdst)
-	FormatCmakeBatch(batchfile,vsver,basedir,compiletarget,platform,abssrc,absdst,args)
+	FormatCmakeBatch batchfile,vsver,basedir,compiletarget,platform,abssrc,absdst,args
 	RunCommand(batchfile)
 	Chdir(retdir)
 End Function
@@ -77,10 +76,10 @@ Function Usage(ec,fmt)
 	End if
 	fh.Writeline(WScript.ScriptName & " [OPTIONS] -- [CMAKE_OPTIONS]")
 	fh.Writeline(chr(9) &"-h|--help                    to display this information")
-	fh.Writeline(chr(9) &"-d|--dir directory        to specify the directory running cmake")
-	fh.Writeline(chr(9) &"-s|--source directory  to specify the source directory")
-	fh.Writeline(chr(9) &"-a|--arch arch            to specify arch it can accept(x64|x86)")
-	fh.Writeline(chr(9) &"--                                to stop parse args ,next is for cmake")
+	fh.Writeline(chr(9) &"-d|--dir directory           to specify the directory running cmake")
+	fh.Writeline(chr(9) &"-s|--source directory        to specify the source directory")
+	fh.Writeline(chr(9) &"-a|--arch arch               to specify arch it can accept(x64|x86)")
+	fh.Writeline(chr(9) &"--                           to stop parse args ,next is for cmake")
 	WScript.Quit(ec)
 End Function
 
@@ -188,15 +187,17 @@ if IsEmpty(basedir) Then
 End If
 
 wscript.stdout.writeline("basedir ("& basedir & ")")
-
+dim compiletarget
 set vscmake = new VSCMakePlatform
 if cmakearch = "x64" Then
 	platform = vscmake.GetPlatform(vsver,1)
+	compiletarget = "amd64"
 Else
 	platform = vscmake.GetPlatform(vsver,0)
+	compiletarget = "amd64_x86"
 End If
 
 wscript.stdout.writeline("Get Platform (" & platform &")")
 
-call CmakeRun(platform, sourcedir,cmakedir,cmakeargs)
+call CmakeRun(vsver,basedir,compiletarget,platform, sourcedir,cmakedir,cmakeargs)
 
