@@ -19,9 +19,7 @@ call includeFile( GetScriptDir() & "\base_func.vbs")
 call includeFile( GetScriptDir() & "\vs_cmake.vbs")
 
 Function FilterText(line,filterctx)
-    dim retval
-    retval=filterctx.FilterVersion(line)
-    FilterText=retval
+    FilterText=filterctx.FilterVersion(line)
 End Function
 
 
@@ -45,12 +43,13 @@ Class CmdExtractVersion
     Private m_version
     Public Function FilterVersion(line)
         dim re,result,num,a,resa,b
+        dim setv
         set re = new regexp
         '  to get the gox.x.x version number
         re.Pattern = "\s+([0-9]+((\.[0-9]*)+))]$"
         set result = re.Execute(line)   
         num = 0
-        FilterVersion=false
+        setv=false
         if Not IsEmpty(result) Then
             for Each a in result
                 re.Pattern = "[0-9]+((\.[0-9]*)+)"
@@ -59,11 +58,12 @@ Class CmdExtractVersion
                     for Each b in resa
                         b = Trim(b)
                         m_version=b
-                        FilterVersion=true
+                        setv=true
                     Next
                 End If
             Next
         End If
+        FilterVersion=setv
     End Function
     Public Function  GetVersion()
         GetVersion=m_version
@@ -138,12 +138,13 @@ Class GolangExtractVersion
     Private m_version
     Public Function FilterVersion(line)
         dim re,result,num,a,resa,b
+        dim setv
         set re = new regexp
         '  to get the gox.x.x version number
         re.Pattern = "go([0-9]+((.[0-9]*)+))\s+"
         set result = re.Execute(line)   
         num = 0
-        FilterVersion=false
+        setv=false
         if Not IsEmpty(result) Then
             for Each a in result
                 re.Pattern = "[0-9]+((.[0-9]*)+)\s+"
@@ -152,11 +153,12 @@ Class GolangExtractVersion
                     for Each b in resa
                         b = Trim(b)
                         m_version=b
-                        FilterVersion=true
+                        setv=true
                     Next
                 End If
             Next
         End If
+        FilterVersion=setv
     End Function
     Public Function  GetVersion()
         GetVersion=m_version
@@ -199,13 +201,13 @@ Class CMakeExtractVersion
     Private m_version
     Public Function FilterVersion(line)
         dim re,result,num,a,resa,b
+        dim setv
         set re = new regexp
-        Wscript.Stderr.WriteLine("call line["& line &"]")
-        ' 
+        '  
         re.Pattern = "cmake\s+version\s+([0-9]+((\.[0-9]*)+))(-[a-zA-Z0-9_])?"
         set result = re.Execute(line)   
         num = 0
-        FilterVersion=false
+        setv=false
         if Not IsEmpty(result) Then
             for Each a in result
                 re.Pattern = "[0-9]+((\.[0-9]*)+)"
@@ -214,11 +216,12 @@ Class CMakeExtractVersion
                     for Each b in resa
                         b = Trim(b)
                         m_version=b
-                        FilterVersion=true
+                        setv=true
                     Next
                 End If
             Next
         End If
+        FilterVersion=setv
     End Function
     Public Function  GetVersion()
         if IsEmpty(m_version) and IsNull(m_version) Then
@@ -233,52 +236,46 @@ dim cmakeversion
 
 
 Function CheckCmakeVersion(basever)
+    dim patharr
+    dim pathval
+    dim curpath
     dim curgoexe
-    dim cmdlines
-    dim vsver
-    dim basedir
-
-    vsver = GetVsVersion()
-    if vsver = "" Then
+    pathval = GetEnv("PATH")
+    If IsNull(pathval) Then
         CheckCmakeVersion=false
         Exit Function
     End If
 
-    basedir=GetVisualStudioInstdir(vsver)
-    if IsNull(basedir) Then
-        CheckCmakeVersion=false
-        Exit Function
-    End If
+    patharr = Split(pathval,";")
+    For Each curpath in patharr
+        If FileExists( curpath & "\" & "cmake.exe") Then
+            curgoexe = curpath & "\" & "cmake.exe"
+            set cmakeversion = new CMakeExtractVersion
+            call GetRunOut(curgoexe,"--version","FilterText","cmakeversion")
+            WScript.Stdout.Writeline("cmake version " & cmakeversion.GetVersion())
+            If VersionCompare(basever,cmakeversion.GetVersion()) Then
+                CheckCmakeVersion=true
+            Else
+                CheckCmakeVersion=false
+            End If
+            Exit Function
+        End If
+    Next
 
-
-    cmdlines = GetVsAllBatchCall(vsver,basedir,"amd64")
-    cmdlines = cmdlines & chr(13) & chr(10)
-    cmdlines = cmdlines & "cmake --version" & chr(13) & chr(10)
-    cmdlines = cmdlines & "exit" & chr(13) & chr(10)
-    curgoexe = WriteTempFile(cmdlines,"checkXXXXXXX.bat")
-
-    WScript.Stdout.WriteLine("get check bat [" & curgoexe & "]")
-    set cmakeversion = new CMakeExtractVersion
-    call GetRunOut(curgoexe," ","FilterText","cmakeversion")
-    WScript.Stdout.Writeline("cmake version " & cmakeversion.GetVersion())
-    If VersionCompare(basever,cmakeversion.GetVersion()) Then
-        CheckCmakeVersion=true
-    Else
-        CheckCmakeVersion=false
-    End If
-    RemoveFileSafe(curgoexe)
+    CheckCmakeVersion=false
 End Function
 
 Class NodeExtractVersion
     Private m_version
     Public Function FilterVersion(line)
         dim re,result,num,a,resa,b
+        dim setv
         set re = new regexp
         '  
         re.Pattern = "v([0-9]+((\.[0-9]*)+))(-[a-zA-Z0-9_]+)?$"
         set result = re.Execute(line)   
         num = 0
-        FilterVersion=false
+        setv=false
         if Not IsEmpty(result) Then
             for Each a in result
                 re.Pattern = "[0-9]+((\.[0-9]*)+)"
@@ -287,11 +284,12 @@ Class NodeExtractVersion
                     for Each b in resa
                         b = Trim(b)
                         m_version=b
-                        FilterVersion=true
+                        setv=true
                     Next
                 End If
             Next
         End If
+        FilterVersion=true
     End Function
     Public Function  GetVersion()
         if IsEmpty(m_version) and IsNull(m_version) Then
@@ -340,12 +338,13 @@ Class NpmExtractVersion
     Private m_version
     Public Function FilterVersion(line)
         dim re,result,num,a,resa,b
+        dim setv
         set re = new regexp
         '  
         re.Pattern = "([0-9]+((\.[0-9]*)+))(-[a-zA-Z0-9_]+)?$"
         set result = re.Execute(line)   
         num = 0
-        FilterVersion=false
+        setv=false
         if Not IsEmpty(result) Then
             for Each a in result
                 re.Pattern = "[0-9]+((\.[0-9]*)+)"
@@ -354,11 +353,12 @@ Class NpmExtractVersion
                     for Each b in resa
                         b = Trim(b)
                         m_version=b
-                        FilterVersion=true
+                        setv=true
                     Next
                 End If
             Next
         End If
+        FilterVersion=setv
     End Function
     Public Function  GetVersion()
         if IsEmpty(m_version) and IsNull(m_version) Then
@@ -435,12 +435,13 @@ Class NsisExtractVersion
     Private m_version
     Public Function FilterVersion(line)
         dim re,result,num,a,resa,b
+        dim setv
         set re = new regexp
         '  
         re.Pattern = "v([0-9]+((\.[0-9]*)+))([a-zA-Z0-9_]+)?$"
         set result = re.Execute(line)   
         num = 0
-        FilterVersion=false
+        setv=false
         if Not IsEmpty(result) Then
             for Each a in result
                 re.Pattern = "[0-9]+((\.[0-9]*)+)"
@@ -449,11 +450,12 @@ Class NsisExtractVersion
                     for Each b in resa
                         b = Trim(b)
                         m_version=b
-                        FilterVersion=true
+                        setv=true
                     Next
                 End If
             Next
         End If
+        FilterVersion=setv
     End Function
     Public Function  GetVersion()
         if IsEmpty(m_version) and IsNull(m_version) Then
@@ -500,12 +502,13 @@ Class GitExtractVersion
     Private m_version
     Public Function FilterVersion(line)
         dim re,result,num,a,resa,b
+        dim setv
         set re = new regexp
         '  to get the gox.x.x version number
         re.Pattern = "git\s+version\s+([0-9]+((\.[0-9]*)+))(.)*$"
         set result = re.Execute(line)   
         num = 0
-        FilterVersion=false
+        setv=false
         if Not IsEmpty(result) Then
             for Each a in result
                 re.Pattern = "[0-9]+((\.[0-9]+)+)"
@@ -514,11 +517,12 @@ Class GitExtractVersion
                     for Each b in resa
                         b = Trim(b)
                         m_version=b
-                        FilterVersion=true
+                        setv=true
                     Next
                 End If
             Next
         End If
+        FilterVersion=setv
     End Function
     Public Function  GetVersion()
         if IsEmpty(m_version) Then
@@ -562,73 +566,6 @@ Function CheckGitVersion(basever)
     CheckGitVersion=false
 End Function
 
-Class PythonExtractVersion
-    Private m_version
-    Public Function FilterVersion(line)
-        dim re,result,num,a,resa,b
-        set re = new regexp
-        '  to get the gox.x.x version number
-        re.Pattern = "Python\s+([0-9]+((\.[0-9]*)+))$"
-        set result = re.Execute(line)   
-        num = 0
-        FilterVersion=false
-        if Not IsEmpty(result) Then
-            for Each a in result
-                re.Pattern = "[0-9]+((\.[0-9]+)+)"
-                set resa = re.Execute(a)
-                if Not IsEmpty(resa) Then
-                    for Each b in resa
-                        b = Trim(b)
-                        m_version=b
-                        FilterVersion=true
-                    Next
-                End If
-            Next
-        End If
-    End Function
-    Public Function  GetVersion()
-        if IsEmpty(m_version) Then
-            GetVersion="0.0.0"
-        Else
-            GetVersion=m_version
-        End If
-    End Function
-End Class
-
-dim pythonversion
-
-Function CheckPythonVersion(basever)
-    dim patharr
-    dim pathval
-    dim curpath
-    dim curcmd
-    pathval = GetEnv("PATH")
-    If IsNull(pathval) Then
-        CheckPythonVersion=false
-        Exit Function
-    End If
-
-    patharr = Split(pathval,";")
-    For Each curpath in patharr
-        If FileExists( curpath & "\" & "python.exe") Then
-            curcmd = curpath & "\" & "python.exe"
-            set pythonversion = new PythonExtractVersion
-            call GetRunOut(curcmd,"-V","FilterText","pythonversion")
-            WScript.Stdout.Writeline("python version " & pythonversion.GetVersion())
-            If VersionCompare(basever,pythonversion.GetVersion()) Then
-                ' now to test for the version
-                CheckPythonVersion=true
-            Else
-                CheckPythonVersion=false
-            End If
-            Exit Function
-        End If
-    Next
-
-    CheckPythonVersion=false
-End Function
-
-
 Function Usage(ec,fmt)
     dim fh
     set fh = WScript.Stderr
@@ -645,13 +582,12 @@ Function Usage(ec,fmt)
     fh.Writeline(chr(9) &"make_platform  version       to check running platform environment")
     fh.Writeline(chr(9) &"visual_studio version        to check for visual studio environment")
     fh.Writeline(chr(9) &"golang   version             to check for golang environment")
-    fh.Writeline(chr(9) &"node     version             to check for node js environment")
-    fh.Writeline(chr(9) &"npm3     version             to check npm3 environment")
-    fh.Writeline(chr(9) &"npm      version             to check npm environment")
-    fh.Writeline(chr(9) &"cmake    version             to check for cmake environment")
-    fh.Writeline(chr(9) &"nsis     version             to check for nsis environment")
-    fh.Writeline(chr(9) &"git      version             to check for git environment")
-    fh.Writeline(chr(9) &"python   version             to check for git environment")
+    fh.Writeline(chr(9) &"node  version                to check for node js environment")
+    fh.Writeline(chr(9) &"npm3  version                to check npm3 environment")
+    fh.Writeline(chr(9) &"npm   version                to check npm environment")
+    fh.Writeline(chr(9) &"cmake version                to check for cmake environment")
+    fh.Writeline(chr(9) &"nsis  version                to check for nsis environment")
+    fh.Writeline(chr(9) &"git   version                to check for git environment")
     WScript.Quit(ec)
 End Function
 
@@ -761,17 +697,6 @@ Function ParseArgs(args)
             retval = CheckGitVersion(optarg)
             If Not retval Then
                 WScript.Stderr.Writeline("must install git for version " & optarg)
-                WScript.Quit(3)
-            End If
-            i = i + 1
-        elseif args(i) = "python" Then
-            If (i+1) > j Then
-                Usage 3 , "python need version"
-            End If
-            optarg = args(i+1)
-            retval = CheckPythonVersion(optarg)
-            If Not retval Then
-                WScript.Stderr.Writeline("must install python for version " & optarg)
                 WScript.Quit(3)
             End If
             i = i + 1

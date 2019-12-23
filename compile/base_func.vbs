@@ -191,6 +191,10 @@ Function GetRunOut(exefile,commands,ByRef filterfunc,ByRef filterctx)
 	        Execute("retval = " & filterfunc & "(line," & filterctx & ")")      
         End If
     Loop
+    if not retval Then
+    	line = execobj.Stdout.ReadLine()
+    	Execute("retval = " & filterfunc & "(line," & filterctx & ")")
+    End If
     GetRunOut=retline
 End Function
 
