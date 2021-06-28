@@ -377,3 +377,6 @@ Class DictObject
 
 End Class
 
+Function FilterText(line,filterctx)
+    FilterText=filterctx.FilterVersion(line)
+End Function

@@ -1,13 +1,127 @@
 
 Option Explicit
 
+dim vsversion
 
-Function GetVsVersion()
+
+class VSWhereVersion
+	Private m_version
+	Private m_instdir
+	Public Function FilterVersion(line)
+        dim rever,repath,result,num,a,resa,b
+        dim setv
+        dim mathed
+        set rever = new regexp
+        set repath = new regexp
+
+        '  to get the gox.x.x version number
+        rever.Pattern = "installationVersion:\s+([0-9]+((\.[0-9]*)+))$"
+        repath.Pattern = "installationPath:\s+(.*)$"
+
+        set result = rever.Execute(line)   
+        num = 0
+        setv=false
+        mathed=false
+        if Not IsEmpty(result) Then
+            for Each a in result
+                rever.Pattern = "[0-9]+((\.[0-9]*)+)"
+                set resa = rever.Execute(a)
+                if Not IsEmpty(resa) Then
+                    for Each b in resa
+                        b = Trim(b)
+                        m_version=b                        
+                        mathed=true
+                    Next
+                End If
+            Next
+        End If
+        if not mathed Then
+        	set result = repath.Execute(line)
+            if Not IsEmpty(result) Then
+                repath.Pattern = "installationPath:\s+"
+                for each a in result
+                    resa =repath.Replace(a,"")
+                    m_instdir=resa
+                    mathed=true
+                Next
+            End IF
+        End If
+        FilterVersion=setv
+	End Function
+    Public Function GetVersion()
+         GetVersion=m_version
+    End Function
+
+    Public Function GetInstPath()
+        GetInstPath=m_instdir
+    End Function
+
+End Class
+
+
+Function GetVsVersion_New()
+    dim patharr
+    dim pathval
+    dim curpath
+    dim curcmd
+    dim curver
+    dim re,result,a
+    Dim process_architecture
+    pathval = GetEnv("PATH")
+    If IsNull(pathval) Then
+        GetVsVersion_New=""
+        Exit Function
+    End If
+
+    patharr = Split(pathval & ";.",";")
+    set vsversion = new VSWhereVersion
+    For Each curpath in patharr
+        If FileExists( curpath & "\" & "vswhere.exe") Then
+            curcmd = curpath & "\" & "vswhere.exe"
+            set vsversion = new VSWhereVersion
+            call GetRunOut(curcmd,"","FilterText","vsversion")
+            WScript.Stdout.Writeline("vsversion version " & vsversion.GetVersion())
+        End If
+    Next
+
+    GetVsVersion_New=vsversion.GetVersion()
+End Function
+
+Function GetVsInstdir_New()
+    dim patharr
+    dim pathval
+    dim curpath
+    dim curcmd
+    dim curver
+    dim re,result,a
+    Dim process_architecture
+    pathval = GetEnv("PATH")
+    If IsNull(pathval) Then
+        GetVsInstdir_New=""
+        Exit Function
+    End If
+
+    patharr = Split(pathval & ";.",";")
+    set vsversion = new VSWhereVersion
+    For Each curpath in patharr
+        If FileExists( curpath & "\" & "vswhere.exe") Then
+            curcmd = curpath & "\" & "vswhere.exe"
+            set vsversion = new VSWhereVersion
+            call GetRunOut(curcmd,"","FilterText","vsversion")
+            WScript.Stdout.Writeline("vsversion version " & vsversion.GetVersion())
+        End If
+    Next
+
+    GetVsInstdir_New=vsversion.GetInstPath()
+End Function
+
+
+Function GetVsVersion_Old()
 	dim regk ,regv,regobj,regarr,c
 	regk = "HKEY_CLASSES_ROOT\VisualStudio.DTE\CurVer\"
 	regv = ReadReg(regk)
 	if IsEmpty(regv) Then
-		GetVsVersion=""
+		GetVsVersion_Old=""
 		Exit Function
 	End If
 	set regobj = CreateObject("VBScript.RegExp")
@@ -18,19 +132,50 @@ Function GetVsVersion()
 	for each c in regarr
 		set regarr = Nothing
 		set regobj = Nothing
-		GetVsVersion=c
+		GetVsVersion_Old=c
 		Exit Function
 	Next
-	GetVsVersion=""
+	GetVsVersion_Old=""
 End Function
 
-Function GetDevenvCom()
+Function FilterVsVersion_New(version)
+    dim values
+    dim verpat
+    dim result
+    dim a
+    values=Array("16.10")
+    for each a in values
+        set verpat = new regexp
+        verpat.Pattern = "^" & a
+        set result = verpat.Execute(version)
+        if Not IsEmpty(result) Then
+            FilterVsVersion_New=a
+            Exit Function
+        End If
+    Next
+    FilterVsVersion_New=version
+End Function
+
+
+Function GetVsVersion()
+    dim version
+    version=GetVsVersion_New()
+    if Len(version) > 0 Then
+    	GetVsVersion=FilterVsVersion_New(version)
+    	Exit Function
+    ENd If
+    version=GetVsVersion_Old()
+    GetVsVersion=version
+End Function
+
+
+Function GetDevenvCom_Old()
 	dim regkey,regval
 	dim regobj
 	regkey="HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\devenv.exe\"
 	regval=ReadReg(regkey)
 	if IsEmpty(regval) Then
-		GetDevenvCom=Empty
+		GetDevenvCom_Old=Empty
 		Exit Function
 	End If
 	set regobj = CreateObject("VBScript.RegExp")
@@ -43,7 +188,7 @@ Function GetDevenvCom()
 	regobj.Pattern = "\.exe$"
 	regval=regobj.Replace(regval,".com")
 	set regobj = Nothing
-	GetDevenvCom=regval
+	GetDevenvCom_Old=regval
 End Function
 
 
@@ -80,9 +225,16 @@ Function IsInstallVisualStudio(version)
 	dim max
 	dim devcom
 	dim getversion
+	dim verget
 	versions=Array(16.0,15.0,14.0,12.0)
 	values=Array("16.0","15.0","14.0","12.0")
-	devcom=GetDevenvCom()
+	verget=GetVsVersion_New()
+	if len(verget) > 0 Then
+		IsInstallVisualStudio=FilterVsVersion_New(verget)
+		Exit Function
+	End If
+
+	devcom=GetDevenvCom_Old()
 	if IsEmpty(devcom) Then
 		' nothing to get ,so we return error
 		IsInstallVisualStudio=Null
@@ -126,8 +278,14 @@ Function GetVisualStudioInstdir(version)
 	dim max
 	dim devcom
 	dim getversion
+	instdir=GetVsInstdir_New()
+	if len(instdir) > 0 Then
+		GetVisualStudioInstdir=instdir
+		Exit Function
+	End If
+
 	versions=Array(16.0,15.0,14.0,12.0)
-	devcom=GetDevenvCom()
+	devcom=GetDevenvCom_Old()
 	if IsEmpty(devcom) Then
 		' nothing to get ,so we return error
 		GetVisualStudioInstdir=Null
@@ -160,7 +318,8 @@ Function GetNmake(basedir,vsver)
 			Exit Function
 		End If
 		GetNmake=Empty
-	ElseIf vsver = "15.0" or vsver = "16.0" Then
+	ElseIf vsver = "15.0" or vsver = "16.0" or vsver = "16.10" Then
+	    WScript.Stderr.writeline("get vsver "& vsver)
 		msvcdir= basedir & "\VC\Tools\MSVC"
 		reads = ReadDir(msvcdir)
 		arrdir = Split(reads,";")

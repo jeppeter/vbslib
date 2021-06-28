@@ -18,9 +18,6 @@ call includeFile( GetScriptDir() & "\vs_find.vbs")
 call includeFile( GetScriptDir() & "\base_func.vbs")
 call includeFile( GetScriptDir() & "\vs_cmake.vbs")
 
-Function FilterText(line,filterctx)
-    FilterText=filterctx.FilterVersion(line)
-End Function
 
 
 Function CheckVisualStudio(basever)
