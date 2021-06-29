@@ -1,5 +1,12 @@
 Option Explicit
 
+Function get_script_dir()
+    dim fso ,scriptpath
+    Set fso = CreateObject("Scripting.FileSystemObject") 
+    get_script_dir=fso.GetParentFolderName(Wscript.ScriptFullName)
+End Function
+
+
 Function RunCommand(cmd)
 	dim objsh,res
 	set objsh = wscript.CreateObject("WScript.Shell")

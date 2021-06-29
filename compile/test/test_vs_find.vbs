@@ -25,6 +25,6 @@ dim basedir
 vsver=IsInstallVisualStudio(10.0)
 basedir=GetVisualStudioInstdir(10.0)
 
+
 nmakeexe = GetNmake(basedir,vsver)
 Wscript.stderr.writeline("version " & vsver & " basedir" & basedir & " nmakeexe" & nmakeexe)
-

@@ -73,7 +73,7 @@ Function GetVsVersion_New()
         Exit Function
     End If
 
-    patharr = Split(pathval & ";.",";")
+    patharr = Split(pathval & ";.;" & get_script_dir(),";")
     set vsversion = new VSWhereVersion
     For Each curpath in patharr
         If FileExists( curpath & "\" & "vswhere.exe") Then
@@ -101,7 +101,7 @@ Function GetVsInstdir_New()
         Exit Function
     End If
 
-    patharr = Split(pathval & ";.",";")
+    patharr = Split(pathval & ";.;" & get_script_dir(),";")
     set vsversion = new VSWhereVersion
     For Each curpath in patharr
         If FileExists( curpath & "\" & "vswhere.exe") Then
@@ -279,6 +279,7 @@ Function GetVisualStudioInstdir(version)
 	dim devcom
 	dim getversion
 	instdir=GetVsInstdir_New()
+	WScript.Stderr.Writeline("instdir " & instdir)
 	if len(instdir) > 0 Then
 		GetVisualStudioInstdir=instdir
 		Exit Function
