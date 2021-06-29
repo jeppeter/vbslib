@@ -669,13 +669,21 @@ Function ParseArgs(args)
             If (i+1) > j Then
                 Usage 3 , "visual_studio need version"
             End If
-            optarg = args(i+1)
-            retval = CheckMakePlatform(optarg,true)
-            If Not retval Then
-              Wscript.Stderr.Writeline("must run in 64bit mode windows version " & optarg)
-              Wscript.Quit(3)
+            retval=False
+            optarg=""
+            do While (i+1) < j
+                optarg = args(i+1)
+                retval = CheckMakePlatform(optarg,true)
+                i = i + 1
+                If retval Then
+                    Exit do
+                End If
+            Loop
+            if not retval Then
+                Wscript.Stderr.Writeline("must run in 64bit mode windows version " & optarg)
+                Wscript.Quit(3)
             End If
-            i = i + 1
+            Wscript.Quit(0)
         elseif args(i) = "visual_studio" Then
             If (i+1) > j Then
                 Usage 3 , "visual_studio need version"

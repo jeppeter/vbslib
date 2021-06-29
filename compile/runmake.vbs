@@ -28,9 +28,9 @@ Function GetScriptDir()
 End Function
 
 
+call includeFile( GetScriptDir() & "\base_func.vbs")
 call includeFile( GetScriptDir() & "\reg_op.vbs")
 call includeFile( GetScriptDir() & "\vs_find.vbs")
-call includeFile( GetScriptDir() & "\base_func.vbs")
 
 Function Usage(ec,fmt)
     dim fh

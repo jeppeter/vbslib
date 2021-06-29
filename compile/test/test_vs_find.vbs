@@ -13,6 +13,7 @@ Function GetScriptDir()
 End Function
 
 call includeFile( GetScriptDir() & "\..\base_func.vbs")
+call includeFile( GetScriptDir() & "\..\reg_op.vbs")
 call includeFile( GetScriptDir() & "\..\vs_find.vbs")
 
 
